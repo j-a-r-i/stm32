@@ -5,6 +5,15 @@ void config_port_init (void)
 {
 	GPIO_InitTypeDef ioInit;
 	
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	
+	ioInit.GPIO_Pin = GPIO_Pin_0;
+	ioInit.GPIO_Mode = GPIO_Mode_IN;
+	ioInit.GPIO_OType = GPIO_OType_PP;
+	ioInit.GPIO_PuPd = GPIO_PuPd_DOWN;
+	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &ioInit);
+	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 	
 	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
