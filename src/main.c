@@ -4,24 +4,33 @@
  * Copyright 2014 Jari Ojanen
  */
 #include "stm32f0xx.h"
-#include "stlinky.h"
+//#include "stlinky.h"
 #include "config.h"
 
-static volatile struct stlinky sterm;
+typedef void (*callback_fn)(void);
+
+//static volatile struct stlinky sterm;
 static __IO uint32_t delayVar;
+static callback_fn timerCb;
+static uint32_t    timerCounter;
 
 void delay (int a);
-void stlinky_init(void);
+//void stlinky_init(void);
 void SysTick_Handler(void);
 
+void delay_ms(uint32_t msDelay, callback_fn fn)
+{
+	timerCb = fn;
+	timerCounter = msDelay;
+}
 
-void stlinky_init(void)
+/*void stlinky_init(void)
 {
 	sterm.magic = STLINKY_MAGIC;
 	sterm.bufsize = CONFIG_LIB_STLINKY_BSIZE;
 	sterm.txsize = 0;
 	sterm.rxsize = 0;
-}
+	}*/
 
 void exti_init(void)
 {
@@ -63,7 +72,9 @@ void rtc_init(void)
 int main(void)
 {
 	delayVar = 200;
-	stlinky_init();
+	timerCounter = 0;
+
+	//	stlinky_init();
 
 	config_port_init();
 
@@ -72,7 +83,7 @@ int main(void)
 		while (1);
 	}
 
-	stlinky_tx(&sterm, "Hi\n", 3);
+	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
 		//stlinky_tx(&sterm, "Hi", 2);
 	}
@@ -90,6 +101,12 @@ void delay (int a)
 
 void SysTick_Handler(void)
 {
+	if (timerCounter > 0) {
+		timerCounter--;
+		if (timerCounter == 0)
+			(*timerCb)();
+	}
+
 	delayVar--;
 	if (delayVar == 500) {
 		set_LED2;
