@@ -14,25 +14,25 @@ void config_port_init (void)
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &ioInit);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
+	ioInit.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
 	ioInit.GPIO_Mode = GPIO_Mode_AF;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &ioInit);
 	
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource14, 0);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, 0);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, 1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, 1);
 	
 	ioInit.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	ioInit.GPIO_Mode = GPIO_Mode_AF;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOB, &ioInit);
 	
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource3, 0);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, 0);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource5, 0);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, 0);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, 0);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, 0);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource3, 1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, 1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource5, 1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, 1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, 1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, 1);
 	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 	
