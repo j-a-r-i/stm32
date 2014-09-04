@@ -20,6 +20,7 @@ static RTC_TimeTypeDef timeRtc;
 void delay (int a);
 //void stlinky_init(void);
 void SysTick_Handler(void);
+void usart_str(const char *s);
 
 void delay_ms(uint32_t msDelay, callback_fn fn)
 {
@@ -62,8 +63,8 @@ void rtc_init(void)
 
 	PWR_BackupAccessCmd(ENABLE);
 
-	RCC_BackupResetCmd(ENABLE);
-    RCC_BackupResetCmd(DISABLE);
+	//RCC_BackupResetCmd(ENABLE);
+    //RCC_BackupResetCmd(DISABLE);
 
 	RCC_LSICmd(ENABLE);
 
@@ -71,9 +72,15 @@ void rtc_init(void)
 
 	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
 
+	RCC_RTCCLKCmd(ENABLE);
 
-	initRtc.RTC_AsynchPrediv = 0x18f;
-	initRtc.RTC_SynchPrediv  = 0x63;
+	if (RTC_WaitForSynchro() == ERROR)
+		usart_str("E RTC 0\r\n");
+
+	//initRtc.RTC_AsynchPrediv = 0x18f;
+	//initRtc.RTC_SynchPrediv  = 0x63;
+	initRtc.RTC_AsynchPrediv = 99;
+	initRtc.RTC_SynchPrediv  = 399;
 	initRtc.RTC_HourFormat  = RTC_HourFormat_24;
 	if (RTC_Init(&initRtc) == ERROR)
 		usart_str("E RTC 1\r\n");
@@ -224,8 +231,8 @@ void SysTick_Handler(void)
 		tmp++;
 
 		RTC_GetTime(RTC_Format_BIN, &timeRtc);
-		//usart_num(timeRtc.RTC_Hours);
-		usart_num(tmp);
+		usart_num(timeRtc.RTC_Hours);
+		//usart_num(tmp);
 		usart_str(":");
 		usart_num(timeRtc.RTC_Minutes);
 		usart_str(":");
