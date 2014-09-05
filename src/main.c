@@ -222,10 +222,12 @@ void SysTick_Handler(void)
 
 	delayVar--;
 	if (delayVar == 1000) {
-		set_LED2;
+		config_port_set(PIN_LED2);
+		//set_LED2;
 	}
 	else if (delayVar == 0) {
-		clr_LED2;
+		config_port_clear(PIN_LED2);
+		//clr_LED2;
 		delayVar = 2000;
 		//USART_SendData(USART1, 'T');
 		tmp++;

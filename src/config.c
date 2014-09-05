@@ -7,7 +7,14 @@ void config_port_init (void)
 	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_0;
+	ioInit.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+	ioInit.GPIO_Mode = GPIO_Mode_OUT;
+	ioInit.GPIO_OType = GPIO_OType_PP;
+	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &ioInit);
+	
+	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
 	ioInit.GPIO_Mode = GPIO_Mode_IN;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_DOWN;
@@ -42,4 +49,90 @@ void config_port_init (void)
 	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOC, &ioInit);
+}
+
+void config_port_set (uint8_t pin)
+{
+	switch (pin)
+	{
+		case PIN_BUTTON:
+		GPIOA->BSRR = GPIO_Pin_0;
+		break;
+		case PIN_TEMP1:
+		GPIOA->BSRR = GPIO_Pin_3;
+		break;
+		case PIN_TEMP2:
+		GPIOA->BSRR = GPIO_Pin_4;
+		break;
+		case PIN_TEMP3:
+		GPIOA->BSRR = GPIO_Pin_5;
+		break;
+		case PIN_LCD_DATA1:
+		GPIOC->BSRR = GPIO_Pin_0;
+		break;
+		case PIN_LCD_DATA2:
+		GPIOC->BSRR = GPIO_Pin_1;
+		break;
+		case PIN_LCD_DATA3:
+		GPIOC->BSRR = GPIO_Pin_2;
+		break;
+		case PIN_LCD_DATA4:
+		GPIOC->BSRR = GPIO_Pin_3;
+		break;
+		case PIN_LED1:
+		GPIOC->BSRR = GPIO_Pin_8;
+		break;
+		case PIN_LED2:
+		GPIOC->BSRR = GPIO_Pin_9;
+		break;
+		case PIN_LCD_RS:
+		GPIOC->BSRR = GPIO_Pin_10;
+		break;
+		case PIN_LCD_ENABLE:
+		GPIOC->BSRR = GPIO_Pin_11;
+		break;
+	}
+}
+
+void config_port_clear (uint8_t pin)
+{
+	switch (pin)
+	{
+		case PIN_BUTTON:
+		GPIOA->BRR = GPIO_Pin_0;
+		break;
+		case PIN_TEMP1:
+		GPIOA->BRR = GPIO_Pin_3;
+		break;
+		case PIN_TEMP2:
+		GPIOA->BRR = GPIO_Pin_4;
+		break;
+		case PIN_TEMP3:
+		GPIOA->BRR = GPIO_Pin_5;
+		break;
+		case PIN_LCD_DATA1:
+		GPIOC->BRR = GPIO_Pin_0;
+		break;
+		case PIN_LCD_DATA2:
+		GPIOC->BRR = GPIO_Pin_1;
+		break;
+		case PIN_LCD_DATA3:
+		GPIOC->BRR = GPIO_Pin_2;
+		break;
+		case PIN_LCD_DATA4:
+		GPIOC->BRR = GPIO_Pin_3;
+		break;
+		case PIN_LED1:
+		GPIOC->BRR = GPIO_Pin_8;
+		break;
+		case PIN_LED2:
+		GPIOC->BRR = GPIO_Pin_9;
+		break;
+		case PIN_LCD_RS:
+		GPIOC->BRR = GPIO_Pin_10;
+		break;
+		case PIN_LCD_ENABLE:
+		GPIOC->BRR = GPIO_Pin_11;
+		break;
+	}
 }
