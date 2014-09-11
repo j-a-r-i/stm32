@@ -136,3 +136,31 @@ void config_port_clear (uint8_t pin)
 		break;
 	}
 }
+
+void config_port_mode (uint8_t pin, uint8_t out)
+{
+	switch (pin)
+	{
+		case PIN_TEMP1:
+		GPIOA->MODER &= ~((uint32_t)0x3 << (3*2));
+		if (out)
+		{
+			GPIOA->MODER |= ((uint32_t)0x1 << (3*2));
+		}
+		break;
+		case PIN_TEMP2:
+		GPIOA->MODER &= ~((uint32_t)0x3 << (4*2));
+		if (out)
+		{
+			GPIOA->MODER |= ((uint32_t)0x1 << (4*2));
+		}
+		break;
+		case PIN_TEMP3:
+		GPIOA->MODER &= ~((uint32_t)0x3 << (5*2));
+		if (out)
+		{
+			GPIOA->MODER |= ((uint32_t)0x1 << (5*2));
+		}
+		break;
+	}
+}

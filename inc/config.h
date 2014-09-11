@@ -4,6 +4,7 @@
 extern void config_port_init (void);
 extern void config_port_set (uint8_t pin);
 extern void config_port_clear (uint8_t pin);
+extern void config_port_mode (uint8_t pin, uint8_t out);
 #define set_TEMP1 GPIOA->BSRR = GPIO_Pin_3
 #define clr_TEMP1 GPIOA->BRR  = GPIO_Pin_3
 #define set_TEMP2 GPIOA->BSRR = GPIO_Pin_4
