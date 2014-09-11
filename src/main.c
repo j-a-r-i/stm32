@@ -22,6 +22,7 @@ void delay (int a);
 void SysTick_Handler(void);
 void usart_str(const char *s);
 
+//------------------------------------------------------------------------------
 void delay_ms(uint32_t msDelay, callback_fn fn)
 {
 	timerCb = fn;
@@ -36,6 +37,7 @@ void delay_ms(uint32_t msDelay, callback_fn fn)
 	sterm.rxsize = 0;
 	}*/
 
+//------------------------------------------------------------------------------
 void exti_init(void)
 {
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
@@ -54,6 +56,7 @@ void exti_init(void)
 	NVIC_Init(&nvicInit);
 }
 
+//------------------------------------------------------------------------------
 void rtc_init(void)
 {
 	RTC_InitTypeDef initRtc;
@@ -112,6 +115,7 @@ void rtc_init(void)
 	RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
 }
 
+//------------------------------------------------------------------------------
 void usart_init(void)
 {
 	USART_InitTypeDef initUsart;
@@ -137,6 +141,7 @@ void usart_init(void)
 	USART_Cmd(USART1, ENABLE);
 }
 
+//------------------------------------------------------------------------------
 void usart_put(uint8_t ch)
 {
       USART_SendData(USART1, (uint8_t) ch);
@@ -144,15 +149,17 @@ void usart_put(uint8_t ch)
       while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
 }
 
+//------------------------------------------------------------------------------
 void usart_str(const char *s)
 {
 	while(*s) {
 		while( USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET );
 		USART_SendData(USART1, *s);
-		*s++;
+		s++;
 	}
 }
 
+//------------------------------------------------------------------------------
 void usart_num(uint8_t n)
 {
 	char digit0, digit1, digit2;
@@ -168,6 +175,7 @@ void usart_num(uint8_t n)
 	usart_put(digit0);
 }
 
+//------------------------------------------------------------------------------
 int main(void)
 {
 	delayVar = 2000;
@@ -193,6 +201,7 @@ int main(void)
 	}
 }
 
+//------------------------------------------------------------------------------
 int __io_putchar(int ch)
 {
 	USART_SendData(USART1, (uint8_t) ch);
@@ -202,6 +211,7 @@ int __io_putchar(int ch)
 	return ch;
 }
 
+//------------------------------------------------------------------------------
 void delay (int a)
 {
 	volatile int i,j;
@@ -212,6 +222,7 @@ void delay (int a)
 	return;
 }
 
+//------------------------------------------------------------------------------
 void SysTick_Handler(void)
 {
 	if (timerCounter > 0) {
@@ -243,6 +254,7 @@ void SysTick_Handler(void)
 	}
 }
 
+//------------------------------------------------------------------------------
 void RTC_IRQHandler(void)
 {
 	set_LED1;
