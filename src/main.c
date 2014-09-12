@@ -6,6 +6,8 @@
 #include "stm32f0xx.h"
 //#include "stlinky.h"
 #include "config.h"
+#include "ds1820.h"
+#include "lcd.h"
 //#include <stdio.h>
 
 typedef void (*callback_fn)(void);
@@ -186,6 +188,8 @@ int main(void)
 	config_port_init();
 	usart_init();
 	rtc_init();
+	lcd_init();
+	ds1820_init(PIN_TEMP1);
 
 	if (SysTick_Config(SystemCoreClock / 1000)) { 
 		/* Capture error */ 
@@ -194,6 +198,11 @@ int main(void)
 
 	usart_str("\r\nHello\r\n");
 	//printf("Hello\n");
+
+
+	lcd_write('h');
+	lcd_write('i');
+	ds1820_read_temp(PIN_TEMP1);
 
 	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {

@@ -164,3 +164,12 @@ void config_port_mode (uint8_t pin, uint8_t out)
 		break;
 	}
 }
+
+uint8_t config_port_read (uint8_t pin)
+{
+	uint8_t ret=0;
+	switch (pin)
+	{
+	}
+	return ret;
+}
