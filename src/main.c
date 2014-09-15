@@ -18,6 +18,7 @@ static callback_fn timerCb;
 static uint32_t    timerCounter;
 static uint8_t     tmp;
 static RTC_TimeTypeDef timeRtc;
+static uint8_t     tim2Counter;
 
 void delay (int a);
 //void stlinky_init(void);
@@ -169,12 +170,38 @@ void usart_num(uint8_t n)
 	digit0 = '0'+(n % 10);
 	n /= 10;
 	digit1 = '0'+(n % 10);
-	n /= 10;
-	digit2 = '0'+(n % 10);
 
-	usart_put(digit2);
+	if (n > 100) {
+		n /= 10;
+		digit2 = '0'+(n % 10);
+
+		usart_put(digit2);
+	}
 	usart_put(digit1);
 	usart_put(digit0);
+}
+
+//------------------------------------------------------------------------------
+void tim_init(void)
+{
+
+	TIM_TimeBaseInitTypeDef timInit;
+	NVIC_InitTypeDef        nvicInit;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+	TIM_TimeBaseStructInit(&timInit);
+	timInit.TIM_Period = 1000;  // ms
+	timInit.TIM_Prescaler = (uint16_t) (SystemCoreClock / 1000) - 1;
+	TIM_TimeBaseInit(TIM2, &timInit);
+
+	nvicInit.NVIC_IRQChannel = TIM2_IRQn;
+	nvicInit.NVIC_IRQChannelPriority = 3;
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&nvicInit);
+ 
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM2, ENABLE);
 }
 
 //------------------------------------------------------------------------------
@@ -185,10 +212,13 @@ int main(void)
 	tmp = 0;
 	//	stlinky_init();
 
+	SystemCoreClockUpdate();
+
 	config_port_init();
 	usart_init();
 	rtc_init();
 	lcd_init();
+	tim_init();
 	ds1820_init(PIN_TEMP1);
 
 	if (SysTick_Config(SystemCoreClock / 1000)) { 
@@ -270,5 +300,18 @@ void RTC_IRQHandler(void)
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET) {
 		USART_SendData(USART1, 'a');
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
+	}
+}
+
+//------------------------------------------------------------------------------
+void TIM2_IRQHandler(void) {
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
+		tim2Counter++;
+		if (tim2Counter % 2)
+			set_LED1;
+		else
+			clr_LED1;
+
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
 }
