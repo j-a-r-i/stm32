@@ -9,6 +9,7 @@
 #include "ds1820.h"
 #include "lcd.h"
 //#include <stdio.h>
+#include "main.h"
 
 typedef void (*callback_fn)(void);
 
@@ -16,9 +17,12 @@ typedef void (*callback_fn)(void);
 static __IO uint32_t delayVar;
 static callback_fn timerCb;
 static uint32_t    timerCounter;
-static uint8_t     tmp;
+static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
 static uint8_t     tim2Counter;
+
+static uint8_t     f_print;  // interrupt tells mainloop to do printing
+static uint8_t     f_delay;
 
 void delay (int a);
 //void stlinky_init(void);
@@ -30,6 +34,20 @@ void delay_ms(uint32_t msDelay, callback_fn fn)
 {
 	timerCb = fn;
 	timerCounter = msDelay;
+}
+
+//------------------------------------------------------------------------------
+void delay_ms2(uint16_t msDelay)
+{
+	/*	timer2Counter = msDelay;
+	f_delay = 1;
+
+	while (f_delay) {
+		if (timer2Counter % 2)
+			set_LED2;
+		else
+		clr_LED2;
+    }*/
 }
 
 /*void stlinky_init(void)
@@ -209,15 +227,13 @@ int main(void)
 {
 	delayVar = 2000;
 	timerCounter = 0;
-	tmp = 0;
+	timer2Counter = 0;
 	//	stlinky_init();
 
 	SystemCoreClockUpdate();
 
 	config_port_init();
 	usart_init();
-	rtc_init();
-	lcd_init();
 	tim_init();
 	ds1820_init(PIN_TEMP1);
 
@@ -225,6 +241,10 @@ int main(void)
 		/* Capture error */ 
 		while (1);
 	}
+
+	lcd_init();
+	rtc_init();
+
 
 	usart_str("\r\nHello\r\n");
 	//printf("Hello\n");
@@ -237,6 +257,22 @@ int main(void)
 	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
 		//stlinky_tx(&sterm, "Hi", 2);
+		if (f_print) {
+			f_print = 0;
+
+			RTC_GetTime(RTC_Format_BIN, &timeRtc);
+			usart_num(timeRtc.RTC_Hours);
+			usart_str(":");
+			usart_num(timeRtc.RTC_Minutes);
+			usart_str(":");
+			usart_num(timeRtc.RTC_Seconds);
+			usart_str("\r\n");
+		}
+
+		if (tim2Counter % 2)
+			set_LED2;
+		else
+			clr_LED2;
 	}
 }
 
@@ -270,26 +306,10 @@ void SysTick_Handler(void)
 			(*timerCb)();
 	}
 
-	delayVar--;
-	if (delayVar == 1000) {
-		config_port_set(PIN_LED2);
-		//set_LED2;
-	}
-	else if (delayVar == 0) {
-		config_port_clear(PIN_LED2);
-		//clr_LED2;
-		delayVar = 2000;
-		//USART_SendData(USART1, 'T');
-		tmp++;
-
-		RTC_GetTime(RTC_Format_BIN, &timeRtc);
-		usart_num(timeRtc.RTC_Hours);
-		//usart_num(tmp);
-		usart_str(":");
-		usart_num(timeRtc.RTC_Minutes);
-		usart_str(":");
-		usart_num(timeRtc.RTC_Seconds);
-		usart_str("\r\n");
+	if (timer2Counter > 0) {
+		timer2Counter--;
+		if (timer2Counter == 0)
+			f_delay = 0;
 	}
 }
 
@@ -306,6 +326,7 @@ void RTC_IRQHandler(void)
 //------------------------------------------------------------------------------
 void TIM2_IRQHandler(void) {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
+		f_print = 1;
 		tim2Counter++;
 		if (tim2Counter % 2)
 			set_LED1;
