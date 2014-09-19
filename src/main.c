@@ -36,18 +36,25 @@ void delay_ms(uint32_t msDelay, callback_fn fn)
 	timerCounter = msDelay;
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------e-------------------------
 void delay_ms2(uint16_t msDelay)
 {
-	/*	timer2Counter = msDelay;
+    uint32_t i = 0x20000;
+
+	i = msDelay*i;
+
+	while (i)
+		i--;
+
+	/*   	timer2Counter = msDelay;
 	f_delay = 1;
 
 	while (f_delay) {
-		if (timer2Counter % 2)
-			set_LED2;
-		else
-		clr_LED2;
-    }*/
+		//	if (timer2Counter % 2)
+		//	set_LED2;
+		//else
+		//clr_LED2;
+		}*/
 }
 
 /*void stlinky_init(void)
@@ -156,10 +163,18 @@ void usart_init(void)
 	initUsart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_Init(USART1, &initUsart);
 
-	//	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	//USART_ITConfig(USART1, USART_IT_TXNE, ENABLE);
     //NVIC_EnableIRQ(USART1_IRQn);
 
+	NVIC_InitTypeDef nvicInit;
+	nvicInit.NVIC_IRQChannel = USART1_IRQn;
+	nvicInit.NVIC_IRQChannelPriority = 0x02;
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&nvicInit);
+
 	USART_Cmd(USART1, ENABLE);
+
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
 //------------------------------------------------------------------------------
@@ -225,6 +240,9 @@ void tim_init(void)
 //------------------------------------------------------------------------------
 int main(void)
 {
+	uint32_t loopCount;
+
+	loopCount = 0;
 	delayVar = 2000;
 	timerCounter = 0;
 	timer2Counter = 0;
@@ -235,6 +253,8 @@ int main(void)
 	config_port_init();
 	usart_init();
 	tim_init();
+  	rtc_init();
+	lcd_init();
 	ds1820_init(PIN_TEMP1);
 
 	if (SysTick_Config(SystemCoreClock / 1000)) { 
@@ -242,13 +262,8 @@ int main(void)
 		while (1);
 	}
 
-	lcd_init();
-	rtc_init();
-
 
 	usart_str("\r\nHello\r\n");
-	//printf("Hello\n");
-
 
 	lcd_write('h');
 	lcd_write('i');
@@ -268,11 +283,14 @@ int main(void)
 			usart_num(timeRtc.RTC_Seconds);
 			usart_str("\r\n");
 		}
-
-		if (tim2Counter % 2)
+		
+		loopCount++;
+		if (loopCount == 1)
 			set_LED2;
-		else
+		else if (loopCount == 0x100000)
 			clr_LED2;
+		else if (loopCount == 0x200000)
+			loopCount=0;
 	}
 }
 
@@ -316,7 +334,7 @@ void SysTick_Handler(void)
 //------------------------------------------------------------------------------
 void RTC_IRQHandler(void)
 {
-	set_LED1;
+	//set_LED1;
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET) {
 		USART_SendData(USART1, 'a');
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
@@ -324,15 +342,32 @@ void RTC_IRQHandler(void)
 }
 
 //------------------------------------------------------------------------------
-void TIM2_IRQHandler(void) {
+void TIM2_IRQHandler(void) 
+{
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		f_print = 1;
-		tim2Counter++;
+		/*tim2Counter++;
 		if (tim2Counter % 2)
 			set_LED1;
 		else
 			clr_LED1;
-
+		*/
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	}
+}
+
+//------------------------------------------------------------------------------
+void USART1_IRQHandler(void) 
+{
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) { // Received characters modify string
+		uint8_t ch = USART1->RDR;
+		switch (ch) {
+		case 'a':
+			set_LED1;
+			break;
+		case 'b':
+			clr_LED1;
+			break;
+		}
 	}
 }

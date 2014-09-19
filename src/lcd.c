@@ -19,7 +19,7 @@ void lcd_output(uint8_t);
 
 void delay2_us(uint16_t tim)
 {
-	uint32_t count = tim*24;
+	uint32_t count = tim*0x1FF;
 	uint32_t i;
 
 	for (i=0; i<count; i++)
