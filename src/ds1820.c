@@ -1,19 +1,13 @@
 #include "stm32f0xx.h"
 #include "ds1820.h"
 #include "config.h"
+#include "main.h"
 
 #define MODE_INPUT  0
 #define MODE_OUTPUT 1
 
 #define USE_DS1820B
 
-extern void delay (int a);
-
-
-void delay_us(uint16_t time)
-{
-	delay(10*time);
-}
 
 void ds1820_init(uint8_t pin)
 {

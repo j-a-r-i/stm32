@@ -13,18 +13,9 @@ void lcd_output(uint8_t);
 //#define delay_us(x)  __delay_cycles(x)
 //#define delay_ms(x)  __delay_cycles(x*1000)
 #else
-//#define delay_us(x)  
-#define delay_ms(x)  delay_ms2(x)
+//#define delay_us(x)  delay_us2(x)
+//#define delay_ms(x)  delay_ms2(x)
 #endif
-
-void delay2_us(uint16_t tim)
-{
-	uint32_t count = tim*0x1FF;
-	uint32_t i;
-
-	for (i=0; i<count; i++)
-		__asm__ __volatile__ ("nop");
-}
 
 void lcd_init()
 {
@@ -56,6 +47,7 @@ void lcd_init()
 	lcd_command(LCD_CLEAR_DISPLAY);
 	delay_ms(2);
 	lcd_command(LCD_RETURN_HOME);
+	delay_ms(2);
 }
 
 void lcd_command(uint8_t value)
@@ -67,13 +59,22 @@ void lcd_command(uint8_t value)
 	delay_ms(10);
 }
 
+void lcd_str(const char *s)
+{
+	while(*s) {
+		lcd_write(*s);
+		s++;
+	}
+}
+
+
 // Prints one character into display
 //
 void lcd_write(uint8_t value)
 {
 	set_LCD_RS;
 	lcd_output(value>>4);
-	delay2_us(500);
+	delay_us(500);
 	lcd_output(0x0F & value);
 	delay_ms(30);
 	delay_ms(30);
@@ -97,7 +98,7 @@ void lcd_output(uint8_t value)
 	//clr_LCD_ENABLE;
 	//DELAY_1US;
 	set_LCD_ENABLE;
-	delay2_us(5);
+	delay_us(5);
 	clr_LCD_ENABLE;
-	delay2_us(500);
+	delay_us(500);
 }

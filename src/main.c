@@ -10,6 +10,7 @@
 #include "lcd.h"
 //#include <stdio.h>
 #include "main.h"
+#include "test.h"
 
 typedef void (*callback_fn)(void);
 
@@ -20,24 +21,56 @@ static uint32_t    timerCounter;
 static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
 static uint8_t     tim2Counter;
-
 static uint8_t     f_print;  // interrupt tells mainloop to do printing
 static uint8_t     f_delay;
 
-void delay (int a);
-//void stlinky_init(void);
 void SysTick_Handler(void);
 void usart_str(const char *s);
 
 //------------------------------------------------------------------------------
-void delay_ms(uint32_t msDelay, callback_fn fn)
+void delayCb_ms(uint32_t msDelay, callback_fn fn)
 {
 	timerCb = fn;
 	timerCounter = msDelay;
 }
 
-//-----------------------------------------------------e-------------------------
-void delay_ms2(uint16_t msDelay)
+void delay_us(uint16_t msDelay)  
+{
+	uint32_t count = (uint32_t)msDelay * 10;
+	uint32_t i;
+
+	for (i=0; i<count; i++) {
+		//__asm__ __volatile__ ("nop");
+		asm("nop");
+	}
+}
+
+void delay_ms(uint16_t msDelay)  
+{  
+	uint32_t count = (uint32_t)msDelay * 8000;
+	uint32_t i;
+
+	for (i=0; i<count; i++) {
+		__asm__ __volatile__ ("nop");
+		//asm("nop");
+	}
+
+    /*uint32_t temp;  
+    SysTick->LOAD=((uint32_t)msDelay)*48000;  
+    SysTick->VAL=0x00;  
+    SysTick->CTRL=0x01;  
+    do  
+    {  
+        temp=SysTick->CTRL;  
+    }  
+    while(temp&0x01 && !(temp&0x10000));  
+    SysTick->CTRL=0x00;  
+    SysTick->VAL=0x00;
+	*/
+}  
+
+//------------------------------------------------------------------------------
+/*void delay_ms2(uint16_t msDelay)
 {
     uint32_t i = 0x20000;
 
@@ -46,7 +79,7 @@ void delay_ms2(uint16_t msDelay)
 	while (i)
 		i--;
 
-	/*   	timer2Counter = msDelay;
+	timer2Counter = msDelay;
 	f_delay = 1;
 
 	while (f_delay) {
@@ -54,8 +87,8 @@ void delay_ms2(uint16_t msDelay)
 		//	set_LED2;
 		//else
 		//clr_LED2;
-		}*/
-}
+   }
+}*/
 
 /*void stlinky_init(void)
 {
@@ -240,13 +273,12 @@ void tim_init(void)
 //------------------------------------------------------------------------------
 int main(void)
 {
-	uint32_t loopCount;
+	//uint32_t loopCount;
 
-	loopCount = 0;
+	//loopCount = 0;
 	delayVar = 2000;
 	timerCounter = 0;
 	timer2Counter = 0;
-	//	stlinky_init();
 
 	SystemCoreClockUpdate();
 
@@ -265,9 +297,17 @@ int main(void)
 
 	usart_str("\r\nHello\r\n");
 
-	lcd_write('h');
-	lcd_write('i');
+	lcd_str("hello");
+
 	ds1820_read_temp(PIN_TEMP1);
+
+
+	/*while (1) {
+		set_LED2;
+		delay_ms2(1000);
+		clr_LED2;
+		delay_ms2(1000);
+    }*/
 
 	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
@@ -283,7 +323,7 @@ int main(void)
 			usart_num(timeRtc.RTC_Seconds);
 			usart_str("\r\n");
 		}
-		
+#if 0
 		loopCount++;
 		if (loopCount == 1)
 			set_LED2;
@@ -291,6 +331,7 @@ int main(void)
 			clr_LED2;
 		else if (loopCount == 0x200000)
 			loopCount=0;
+#endif
 	}
 }
 
@@ -302,17 +343,6 @@ int __io_putchar(int ch)
 	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
 
 	return ch;
-}
-
-//------------------------------------------------------------------------------
-void delay (int a)
-{
-	volatile int i,j;
-	
-	for (i=0 ; i < a ; i++) { 
-		j++;
-	}	
-	return;
 }
 
 //------------------------------------------------------------------------------
@@ -346,8 +376,8 @@ void TIM2_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		f_print = 1;
-		/*tim2Counter++;
-		if (tim2Counter % 2)
+		tim2Counter++;
+		/*if (tim2Counter % 2)
 			set_LED1;
 		else
 			clr_LED1;
@@ -361,13 +391,6 @@ void USART1_IRQHandler(void)
 {
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) { // Received characters modify string
 		uint8_t ch = USART1->RDR;
-		switch (ch) {
-		case 'a':
-			set_LED1;
-			break;
-		case 'b':
-			clr_LED1;
-			break;
-		}
+		test_exec(ch);
 	}
 }
