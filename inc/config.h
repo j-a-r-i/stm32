@@ -6,12 +6,12 @@ extern void config_port_set (uint8_t pin);
 extern void config_port_clear (uint8_t pin);
 extern void config_port_mode (uint8_t pin, uint8_t out);
 extern uint8_t config_port_read (uint8_t pin);
-#define set_TEMP1 GPIOA->BSRR = GPIO_Pin_3
-#define clr_TEMP1 GPIOA->BRR  = GPIO_Pin_3
-#define set_TEMP2 GPIOA->BSRR = GPIO_Pin_4
-#define clr_TEMP2 GPIOA->BRR  = GPIO_Pin_4
-#define set_TEMP3 GPIOA->BSRR = GPIO_Pin_5
-#define clr_TEMP3 GPIOA->BRR  = GPIO_Pin_5
+#define set_TEMP1 GPIOB->BSRR = GPIO_Pin_3
+#define clr_TEMP1 GPIOB->BRR  = GPIO_Pin_3
+#define set_TEMP2 GPIOB->BSRR = GPIO_Pin_4
+#define clr_TEMP2 GPIOB->BRR  = GPIO_Pin_4
+#define set_TEMP3 GPIOB->BSRR = GPIO_Pin_5
+#define clr_TEMP3 GPIOB->BRR  = GPIO_Pin_5
 #define set_LCD_DATA1 GPIOC->BSRR = GPIO_Pin_0
 #define clr_LCD_DATA1 GPIOC->BRR  = GPIO_Pin_0
 #define set_LCD_DATA2 GPIOC->BSRR = GPIO_Pin_1
