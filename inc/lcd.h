@@ -24,6 +24,7 @@
 // Interface to this module
 //
 extern void lcd_init(void);
+extern void lcd_clear(void);
 extern void lcd_str(const char *s);
 extern void lcd_write(uint8_t ch);
 extern void lcd_command(uint8_t cmd);

@@ -44,6 +44,11 @@ void lcd_init()
 	delay_ms(1);
 	lcd_command(LCD_DISPLAY);
 	delay_ms(2);
+	lcd_clear();
+}
+
+void lcd_clear(void)
+{
 	lcd_command(LCD_CLEAR_DISPLAY);
 	delay_ms(2);
 	lcd_command(LCD_RETURN_HOME);

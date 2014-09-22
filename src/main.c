@@ -90,13 +90,6 @@ void delay_ms(uint16_t msDelay)
    }
 }*/
 
-/*void stlinky_init(void)
-{
-	sterm.magic = STLINKY_MAGIC;
-	sterm.bufsize = CONFIG_LIB_STLINKY_BSIZE;
-	sterm.txsize = 0;
-	sterm.rxsize = 0;
-	}*/
 
 //------------------------------------------------------------------------------
 void exti_init(void)
@@ -213,9 +206,9 @@ void usart_init(void)
 //------------------------------------------------------------------------------
 void usart_put(uint8_t ch)
 {
-      USART_SendData(USART1, (uint8_t) ch);
-
       while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+
+      USART_SendData(USART1, (uint8_t) ch);
 }
 
 //------------------------------------------------------------------------------
@@ -333,16 +326,6 @@ int main(void)
 			loopCount=0;
 #endif
 	}
-}
-
-//------------------------------------------------------------------------------
-int __io_putchar(int ch)
-{
-	USART_SendData(USART1, (uint8_t) ch);
-
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
-
-	return ch;
 }
 
 //------------------------------------------------------------------------------
