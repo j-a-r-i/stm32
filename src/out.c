@@ -35,7 +35,7 @@ void out_time(FnPut put, RTC_TimeTypeDef *time)
 	out_byte(put, time->RTC_Hours);
 	(*put)(':');
 	out_byte(put, time->RTC_Minutes);
-	(*put)(':');
-	out_byte(put, time->RTC_Seconds);
+	//	(*put)(':');
+	//	out_byte(put, time->RTC_Seconds);
 	//out_str(put, "\r\n");	
 }

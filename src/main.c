@@ -11,6 +11,8 @@
 //#include <stdio.h>
 #include "main.h"
 #include "test.h"
+#include "out.h"
+#include "queue.h"
 
 typedef void (*callback_fn)(void);
 
@@ -21,8 +23,15 @@ static uint32_t    timerCounter;
 static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
 static uint8_t     tim2Counter;
+//static uint8_t     tim2CounterB;
 static uint8_t     f_print;  // interrupt tells mainloop to do printing
 static uint8_t     f_delay;
+
+#define EVENTS_SIZE 4
+static queue_t     events;
+static uint8_t     eventsData[EVENTS_SIZE];
+
+#define EV_TIMER1 0xA1
 
 void SysTick_Handler(void);
 void usart_str(const char *s);
@@ -95,18 +104,20 @@ void delay_ms(uint16_t msDelay)
 void exti_init(void)
 {
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
-	EXTI_InitTypeDef extiInit;
-	EXTI_StructInit(&extiInit);
-	extiInit.EXTI_Line = EXTI_Line0;
-	extiInit.EXTI_Mode = EXTI_Mode_Interrupt;
-	extiInit.EXTI_Trigger = EXTI_Trigger_Rising;
-	extiInit.EXTI_LineCmd = ENABLE;
+
+	EXTI_InitTypeDef extiInit = {
+		.EXTI_Line = EXTI_Line0,
+		.EXTI_Mode = EXTI_Mode_Interrupt,
+		.EXTI_Trigger = EXTI_Trigger_Rising,
+		.EXTI_LineCmd = ENABLE
+	};
 	EXTI_Init(&extiInit);
 
-	NVIC_InitTypeDef nvicInit;
-	nvicInit.NVIC_IRQChannel = EXTI0_1_IRQn;
-	nvicInit.NVIC_IRQChannelPriority = 0x01;
-	nvicInit.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_InitTypeDef nvicInit = {
+		.NVIC_IRQChannel = EXTI0_1_IRQn,
+		.NVIC_IRQChannelPriority = 0x01,
+		.NVIC_IRQChannelCmd = ENABLE
+	};
 	NVIC_Init(&nvicInit);
 }
 
@@ -268,6 +279,21 @@ int main(void)
 {
 	//uint32_t loopCount;
 
+	queue_init(&events, EVENTS_SIZE, eventsData);
+#if 0
+	queue_push(&events, 10);
+	queue_push(&events, 20);
+	queue_push(&events, 30);
+	queue_push(&events, 40);
+	queue_push(&events, 50);
+	i = queue_pop(&events);
+	i = queue_pop(&events);
+	i = queue_pop(&events);
+	i = queue_pop(&events);
+	i = queue_pop(&events);
+	delayVar = i;
+#endif
+
 	//loopCount = 0;
 	delayVar = 2000;
 	timerCounter = 0;
@@ -276,7 +302,7 @@ int main(void)
 	SystemCoreClockUpdate();
 
 	config_port_init();
-	usart_init();
+	//	usart_init();
 	tim_init();
   	rtc_init();
 	lcd_init();
@@ -304,17 +330,33 @@ int main(void)
 
 	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
-		//stlinky_tx(&sterm, "Hi", 2);
-		if (f_print) {
-			f_print = 0;
+		if (queue_empty(events)) {
+			delay_ms(5);
+		}
+		else {
+			uint8_t ev = queue_pop(&events);
+			switch (ev) {
+			case EV_TIMER1:
+				tim2Counter++;
+				if (tim2Counter % 2)
+					set_LED1;
+				else
+					clr_LED1;
 
-			RTC_GetTime(RTC_Format_BIN, &timeRtc);
-			usart_num(timeRtc.RTC_Hours);
-			usart_str(":");
-			usart_num(timeRtc.RTC_Minutes);
-			usart_str(":");
-			usart_num(timeRtc.RTC_Seconds);
-			usart_str("\r\n");
+				RTC_GetTime(RTC_Format_BIN, &timeRtc);
+				//out_time(usart_put, &timeRtc);
+				
+				lcd_clear();
+				out_time(lcd_write, &timeRtc);
+				//usart_num(timeRtc.RTC_Hours);
+				//usart_str(":");
+				//usart_num(timeRtc.RTC_Minutes);
+				//usart_str(":");
+				//usart_num(timeRtc.RTC_Seconds);
+				//usart_str("\r\n");
+				//delay_ms(30);
+				break;
+			}
 		}
 #if 0
 		loopCount++;
@@ -359,12 +401,14 @@ void TIM2_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		f_print = 1;
-		tim2Counter++;
-		/*if (tim2Counter % 2)
-			set_LED1;
+		queue_push(&events, EV_TIMER1);
+#if 0
+		tim2CounterB++;
+		if (tim2CounterB % 2)
+			set_LED2;
 		else
-			clr_LED1;
-		*/
+			clr_LED2;
+#endif	
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
 }
