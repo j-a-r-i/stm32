@@ -2,7 +2,7 @@
 #include "w5200.h"
 
 //------------------------------------------------------------------------------
-void w5200_init()
+void w5200_init(void)
 {
 	SPI_InitTypeDef spiInit;
 
@@ -26,20 +26,20 @@ void w5200_init()
 //------------------------------------------------------------------------------
 void w5200_write(uint16_t reg, uint8_t value)
 {
-	SPI_I2S_SendData(SPI1, reg >> 8);
-	SPI_I2S_SendData(SPI1, reg & 0xFF);
-	SPI_I2S_SendData(SPI1, 0x80);
-	SPI_I2S_SendData(SPI1, 0x01);
-	SPI_I2S_SendData(SPI1, value);
+	SPI_SendData8(SPI1, reg >> 8);
+	SPI_SendData8(SPI1, reg & 0xFF);
+	SPI_SendData8(SPI1, 0x80);
+	SPI_SendData8(SPI1, 0x01);
+	SPI_SendData8(SPI1, value);
 }
 
 //------------------------------------------------------------------------------
 uint8_t w5200_read(uint16_t reg)
 {
-	SPI_I2S_SendData(SPI1, reg >> 8);
-	SPI_I2S_SendData(SPI1, reg & 0xFF);
-	SPI_I2S_SendData(SPI1, 0x00);
-	SPI_I2S_SendData(SPI1, 0x01);
-	return SPI_I2S_ReceiveData(SPI1);
+	SPI_SendData8(SPI1, reg >> 8);
+	SPI_SendData8(SPI1, reg & 0xFF);
+	SPI_SendData8(SPI1, 0x00);
+	SPI_SendData8(SPI1, 0x01);
+	return SPI_ReceiveData8(SPI1);
 }
 

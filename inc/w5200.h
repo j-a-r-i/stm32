@@ -63,7 +63,7 @@
 
 // Interface
 //
-extern void w5200_init();
+extern void w5200_init(void);
 extern void w5200_write(uint16_t reg, uint8_t value);
 extern uint8_t w5200_read(uint16_t reg);
 
