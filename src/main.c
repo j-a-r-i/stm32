@@ -22,8 +22,6 @@ static callback_fn timerCb;
 static uint32_t    timerCounter;
 static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
-static uint8_t     tim2Counter;
-//static uint8_t     tim2CounterB;
 static uint8_t     f_print;  // interrupt tells mainloop to do printing
 static uint8_t     f_delay;
 
@@ -92,10 +90,7 @@ void delay_ms(uint16_t msDelay)
 	f_delay = 1;
 
 	while (f_delay) {
-		//	if (timer2Counter % 2)
-		//	set_LED2;
-		//else
-		//clr_LED2;
+	    toggle_LED2;
    }
 }*/
 
@@ -322,26 +317,20 @@ int main(void)
 
 
 	/*while (1) {
-		set_LED2;
-		delay_ms2(1000);
-		clr_LED2;
-		delay_ms2(1000);
+	    toggle_LED2;
+		delay_ms(1000);
     }*/
 
 	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
 		if (queue_empty(events)) {
-			delay_ms(5);
+			delay_ms(2);
 		}
 		else {
 			uint8_t ev = queue_pop(&events);
 			switch (ev) {
 			case EV_TIMER1:
-				tim2Counter++;
-				if (tim2Counter % 2)
-					set_LED1;
-				else
-					clr_LED1;
+				toggle_LED1;
 
 				RTC_GetTime(RTC_Format_BIN, &timeRtc);
 				//out_time(usart_put, &timeRtc);
@@ -402,12 +391,8 @@ void TIM2_IRQHandler(void)
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		f_print = 1;
 		queue_push(&events, EV_TIMER1);
-#if 0
-		tim2CounterB++;
-		if (tim2CounterB % 2)
-			set_LED2;
-		else
-			clr_LED2;
+#if 1
+		toggle_LED2;
 #endif	
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
