@@ -26,7 +26,7 @@ void lcd_init()
 	clr_LCD_DATA3;
 	clr_LCD_DATA4;
 	
-	delay_ms(60);         // Wait for LCD display to bootup
+	delay_ms(50);         // Wait for LCD display to bootup
 
 	clr_LCD_RS;                       // control lines to initial position
 	clr_LCD_ENABLE;
@@ -45,12 +45,12 @@ void lcd_init()
 	lcd_command(LCD_DISPLAY);
 	delay_ms(2);
 	lcd_clear();
+	lcd_command(LCD_CLEAR_DISPLAY);
+	delay_ms(2);
 }
 
 void lcd_clear(void)
 {
-	lcd_command(LCD_CLEAR_DISPLAY);
-	delay_ms(2);
 	lcd_command(LCD_RETURN_HOME);
 	delay_ms(2);
 }
@@ -61,7 +61,7 @@ void lcd_command(uint8_t value)
 	lcd_output(value>>4);
 	delay_ms(1);
 	lcd_output(value);
-	delay_ms(10);
+	delay_ms(1);
 }
 
 void lcd_str(const char *s)
@@ -81,8 +81,8 @@ void lcd_write(uint8_t value)
 	lcd_output(value>>4);
 	delay_us(500);
 	lcd_output(0x0F & value);
-	delay_ms(30);
-	delay_ms(30);
+	delay_ms(3);
+	//delay_ms(30);
 }
 
 
@@ -105,5 +105,5 @@ void lcd_output(uint8_t value)
 	set_LCD_ENABLE;
 	delay_us(5);
 	clr_LCD_ENABLE;
-	delay_us(500);
+	delay_us(400);
 }
