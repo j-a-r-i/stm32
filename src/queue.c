@@ -18,7 +18,7 @@ void queue_push(queue_t *q, uint8_t data)
 uint8_t queue_pop(queue_t *q)
 {
 	uint8_t val = q->data[q->bottom];
-	q->top = (q->top + 1) % q->size;	
+	q->bottom = (q->bottom + 1) % q->size;	
 	return val;
 }
 
