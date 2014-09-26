@@ -4,25 +4,22 @@
  * Copyright 2014 Jari Ojanen
  */
 #include "stm32f0xx.h"
-//#include "stlinky.h"
 #include "config.h"
 #include "ds1820.h"
 #include "lcd.h"
-//#include <stdio.h>
 #include "main.h"
 #include "test.h"
 #include "out.h"
 #include "queue.h"
+#include "pff.h"
 
 typedef void (*callback_fn)(void);
 
-//static volatile struct stlinky sterm;
 static __IO uint32_t delayVar;
 static callback_fn timerCb;
 static uint32_t    timerCounter;
 static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
-static uint8_t     f_print;  // interrupt tells mainloop to do printing
 static uint8_t     f_delay;
 
 #define EVENTS_SIZE 4
@@ -256,7 +253,7 @@ void tim_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
 	TIM_TimeBaseStructInit(&timInit);
-	timInit.TIM_Period = 1000;  // ms
+	timInit.TIM_Period = 2000;  // ms
 	timInit.TIM_Prescaler = (uint16_t) (SystemCoreClock / 1000) - 1;
 	TIM_TimeBaseInit(TIM2, &timInit);
 
@@ -267,6 +264,26 @@ void tim_init(void)
  
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM2, ENABLE);
+}
+
+int write_sdcard(void)
+{
+	FATFS fs;          /* Work area (file system object) for the volume */
+    BYTE buff[16];     /* File read buffer */
+    UINT br;           /* File read count */
+    FRESULT res;       /* Petit FatFs function common result code */
+
+    res = pf_mount(&fs);
+    if (res) 
+		return res;
+
+    res = pf_open("srcfile.dat");
+    if (res)
+		return res;
+
+	res = pf_write(buff, 16, &br);
+	
+	return res;
 }
 
 //------------------------------------------------------------------------------
@@ -297,7 +314,7 @@ int main(void)
 	SystemCoreClockUpdate();
 
 	config_port_init();
-	//	usart_init();
+	usart_init();
 	tim_init();
   	rtc_init();
 	lcd_init();
@@ -315,6 +332,7 @@ int main(void)
 
 	ds1820_read_temp(PIN_TEMP1);
 
+	write_sdcard();
 
 	/*while (1) {
 	    toggle_LED2;
@@ -328,15 +346,22 @@ int main(void)
 		}
 		else {
 			uint8_t ev = queue_pop(&events);
+			uint8_t temp;
 			switch (ev) {
 			case EV_TIMER1:
-				toggle_LED1;
+				//toggle_LED1;
 
 				RTC_GetTime(RTC_Format_BIN, &timeRtc);
-				//out_time(usart_put, &timeRtc);
+				temp = ds1820_read_temp(PIN_TEMP1);
+
+				out_time(usart_put, &timeRtc);
+				usart_put('\r');
+				usart_put('\n');
 				
 				lcd_clear();
 				out_time(lcd_write, &timeRtc);
+				lcd_write(' ');
+				out_byte(lcd_write, temp);
 				//usart_num(timeRtc.RTC_Hours);
 				//usart_str(":");
 				//usart_num(timeRtc.RTC_Minutes);
@@ -389,12 +414,11 @@ void RTC_IRQHandler(void)
 void TIM2_IRQHandler(void) 
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
-		f_print = 1;
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 		queue_push(&events, EV_TIMER1);
-#if 1
+#if 0
 		toggle_LED2;
 #endif	
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
 }
 
