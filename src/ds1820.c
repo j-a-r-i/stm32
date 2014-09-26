@@ -8,16 +8,20 @@
 
 #define USE_DS1820B
 
+extern void ds1820_reset(uint8_t pin);
+extern void usart_str(const char*);
 
 void ds1820_init(uint8_t pin)
 {
 	config_port_mode(pin, MODE_OUTPUT);
 	config_port_set(pin);
+	delay_us(5);
+	ds1820_reset(pin);
 }
 
 void ds1820_reset(uint8_t pin)
 {
-	uint8_t mode;
+	uint8_t presence;
 
 	// do reset
 	config_port_clear(pin);
@@ -27,8 +31,12 @@ void ds1820_reset(uint8_t pin)
 
 	// do presense
 	delay_us(90);   // wait for DS1820 to send presence
-	mode = config_port_read(pin);
+	presence = config_port_read(pin);
 	delay_us(410);
+	if (presence)
+		usart_str("E DS1 0\r\n");
+	//else
+	//	usart_str("DS1 found\r\n");
 	config_port_mode(pin, MODE_OUTPUT);
 }
 
@@ -39,14 +47,14 @@ void ds1820_write(uint8_t pin, uint8_t data)
 	for (i=0; i<8; i++) {
 		config_port_clear(pin);
 		if (data & (1<<i)) {      // send bit 1
-			delay_us(1);
+			delay_us(5);
 			config_port_set(pin);
-			delay_us(99);
+			delay_us(75);
 		}
 		else {                    // send bit 0
 			delay_us(70);
 			config_port_set(pin);
-			delay_us(30);			
+			delay_us(10);			
 		}
 	}
 }
@@ -87,7 +95,7 @@ uint8_t ds1820_read_temp(uint8_t pin)
 	ds1820_reset(pin);
 	ds1820_write(pin, DS1820_CMD_SKIP_ROM);
 	ds1820_write(pin, DS1820_CMD_CONVERT);
-	delay_us(750);
+	delay_ms(750);
 	ds1820_reset(pin);
 	ds1820_write(pin, DS1820_CMD_SKIP_ROM);
 	ds1820_write(pin, DS1820_CMD_READ_SCRATCHPAD);
