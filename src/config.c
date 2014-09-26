@@ -46,7 +46,7 @@ void config_port_init (void)
 	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11;
+	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_13;
 	ioInit.GPIO_Mode = GPIO_Mode_OUT;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
@@ -61,13 +61,13 @@ void config_port_set (uint8_t pin)
 		case PIN_BUTTON:
 		GPIOA->BSRR = GPIO_Pin_0;
 		break;
-		case PIN_TEMP1:
+		case PIN_TEMP2:
 		GPIOB->BSRR = GPIO_Pin_3;
 		break;
-		case PIN_TEMP2:
+		case PIN_TEMP3:
 		GPIOB->BSRR = GPIO_Pin_4;
 		break;
-		case PIN_TEMP3:
+		case PIN_TEMP4:
 		GPIOB->BSRR = GPIO_Pin_5;
 		break;
 		case PIN_LCD_DATA1:
@@ -94,6 +94,9 @@ void config_port_set (uint8_t pin)
 		case PIN_LCD_ENABLE:
 		GPIOC->BSRR = GPIO_Pin_11;
 		break;
+		case PIN_TEMP1:
+		GPIOC->BSRR = GPIO_Pin_13;
+		break;
 	}
 }
 
@@ -104,13 +107,13 @@ void config_port_clear (uint8_t pin)
 		case PIN_BUTTON:
 		GPIOA->BRR = GPIO_Pin_0;
 		break;
-		case PIN_TEMP1:
+		case PIN_TEMP2:
 		GPIOB->BRR = GPIO_Pin_3;
 		break;
-		case PIN_TEMP2:
+		case PIN_TEMP3:
 		GPIOB->BRR = GPIO_Pin_4;
 		break;
-		case PIN_TEMP3:
+		case PIN_TEMP4:
 		GPIOB->BRR = GPIO_Pin_5;
 		break;
 		case PIN_LCD_DATA1:
@@ -137,6 +140,9 @@ void config_port_clear (uint8_t pin)
 		case PIN_LCD_ENABLE:
 		GPIOC->BRR = GPIO_Pin_11;
 		break;
+		case PIN_TEMP1:
+		GPIOC->BRR = GPIO_Pin_13;
+		break;
 	}
 }
 
@@ -144,25 +150,32 @@ void config_port_mode (uint8_t pin, uint8_t out)
 {
 	switch (pin)
 	{
-		case PIN_TEMP1:
+		case PIN_TEMP2:
 		GPIOB->MODER &= ~((uint32_t)0x3 << (3*2));
 		if (out)
 		{
 			GPIOB->MODER |= ((uint32_t)0x1 << (3*2));
 		}
 		break;
-		case PIN_TEMP2:
+		case PIN_TEMP3:
 		GPIOB->MODER &= ~((uint32_t)0x3 << (4*2));
 		if (out)
 		{
 			GPIOB->MODER |= ((uint32_t)0x1 << (4*2));
 		}
 		break;
-		case PIN_TEMP3:
+		case PIN_TEMP4:
 		GPIOB->MODER &= ~((uint32_t)0x3 << (5*2));
 		if (out)
 		{
 			GPIOB->MODER |= ((uint32_t)0x1 << (5*2));
+		}
+		break;
+		case PIN_TEMP1:
+		GPIOC->MODER &= ~((uint32_t)0x3 << (13*2));
+		if (out)
+		{
+			GPIOC->MODER |= ((uint32_t)0x1 << (13*2));
 		}
 		break;
 	}
