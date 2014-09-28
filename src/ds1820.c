@@ -15,8 +15,8 @@ void ds1820_init(uint8_t pin)
 {
 	config_port_mode(pin, MODE_OUTPUT);
 	config_port_set(pin);
-	delay_us(5);
-	ds1820_reset(pin);
+	//	delay_us(5);
+	//	ds1820_reset(pin);
 }
 
 void ds1820_reset(uint8_t pin)
@@ -49,12 +49,12 @@ void ds1820_write(uint8_t pin, uint8_t data)
 		if (data & (1<<i)) {      // send bit 1
 			delay_us(5);
 			config_port_set(pin);
-			delay_us(75);
+			delay_us(60);
 		}
 		else {                    // send bit 0
-			delay_us(70);
+			delay_us(62);
 			config_port_set(pin);
-			delay_us(10);			
+			delay_us(3);			
 		}
 	}
 }
@@ -64,18 +64,21 @@ uint8_t ds1820_read(uint8_t pin)
 	uint8_t i;
 	uint8_t ret = 0;
 
+	config_port_set(pin);
+	delay_us(2);
 	for (i=0; i<8; i++) {
 		config_port_clear(pin);
-		delay_us(15);
+		delay_us(2);
 		config_port_mode(pin, MODE_INPUT);
 		ret = ret << 1;
+		delay_us(13);
 		if (config_port_read(pin))
 			ret++;
 
-		delay_us(0);
-		config_port_mode(pin, MODE_OUTPUT);
+		delay_us(48);
 		config_port_set(pin);
-		delay_us(10);
+		config_port_mode(pin, MODE_OUTPUT);
+		delay_us(4);
 	}
 	
 	return ret;
@@ -98,12 +101,31 @@ uint8_t ds1820_read_temp(uint8_t pin)
 	delay_ms(750);
 	ds1820_reset(pin);
 	ds1820_write(pin, DS1820_CMD_SKIP_ROM);
+	
+	set_TEMP2;
+	delay_us(2);
+	clr_TEMP2;
+	delay_us(10);
+	set_TEMP2;
+	delay_us(2);
+	clr_TEMP2;
+
 	ds1820_write(pin, DS1820_CMD_READ_SCRATCHPAD);
+
 
 	// Read scratchpad
 	//
+	set_TEMP2;
+	delay_us(2);
+	clr_TEMP2;
 	temp_lsb = ds1820_read(pin);
+	set_TEMP2;
+	delay_us(2);
+	clr_TEMP2;
 	temp_msb = ds1820_read(pin);
+	set_TEMP2;
+	delay_us(2);
+	clr_TEMP2;
 	ds1820_read(pin); // Th register or user byte 1
 	ds1820_read(pin); // Tl register or user byte 2
 	ds1820_read(pin); // reserved

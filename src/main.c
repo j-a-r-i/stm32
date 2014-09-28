@@ -40,13 +40,23 @@ void delayCb_ms(uint32_t msDelay, callback_fn fn)
 
 void delay_us(uint16_t msDelay)  
 {
-	uint32_t count = (uint32_t)msDelay * 10;
+	/*uint32_t count = (uint32_t)msDelay * 8;
 	uint32_t i;
 
 	for (i=0; i<count; i++) {
 		//__asm__ __volatile__ ("nop");
 		asm("nop");
-	}
+	}*/
+    uint32_t cnt;  
+    SysTick->LOAD=msDelay*4;  
+    SysTick->VAL=0x00;  
+    SysTick->CTRL=0x01;  
+    do {  
+        cnt=SysTick->CTRL;  
+    }  
+    while(cnt & 0x01 && !(cnt & 0x10000));  
+    SysTick->CTRL=0x00;  
+    SysTick->VAL=0x00;
 }
 
 void delay_ms(uint16_t msDelay)  
@@ -324,6 +334,14 @@ int main(void)
 		/* Capture error */ 
 		while (1);
 	}
+
+
+#if 0
+	while (1) {
+		ds1820_write(PIN_TEMP1, 0xCC);
+		delay_us(300);
+	}
+#endif
 
 
 	usart_str("\r\nHello\r\n");

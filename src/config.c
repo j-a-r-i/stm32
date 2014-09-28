@@ -50,7 +50,7 @@ void config_port_init (void)
 	ioInit.GPIO_Mode = GPIO_Mode_OUT;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
+	ioInit.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &ioInit);
 }
 
@@ -151,10 +151,10 @@ void config_port_mode (uint8_t pin, uint8_t out)
 	switch (pin)
 	{
 		case PIN_TEMP2:
-		GPIOB->MODER &= ~((uint32_t)0x3 << (3*2));
+			GPIOB->MODER &= ~(((uint32_t)0x3) << (3*2));
 		if (out)
 		{
-			GPIOB->MODER |= ((uint32_t)0x1 << (3*2));
+			GPIOB->MODER |= (((uint32_t)0x1) << (3*2));
 		}
 		break;
 		case PIN_TEMP3:
@@ -172,10 +172,10 @@ void config_port_mode (uint8_t pin, uint8_t out)
 		}
 		break;
 		case PIN_TEMP1:
-		GPIOC->MODER &= ~((uint32_t)0x3 << (13*2));
+			GPIOC->MODER &= ~(((uint32_t)0x3) << (13*2));
 		if (out)
 		{
-			GPIOC->MODER |= ((uint32_t)0x1 << (13*2));
+			GPIOC->MODER |= (((uint32_t)0x1) << (13*2));
 		}
 		break;
 	}
