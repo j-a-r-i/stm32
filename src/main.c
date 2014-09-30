@@ -147,9 +147,7 @@ void rtc_init(void)
 	if (RTC_WaitForSynchro() == ERROR)
 		usart_str("E RTC 0\r\n");
 
-	//initRtc.RTC_AsynchPrediv = 0x18f;
-	//initRtc.RTC_SynchPrediv  = 0x63;
-	initRtc.RTC_AsynchPrediv = 99;
+	initRtc.RTC_AsynchPrediv = 99;  // LSI is 40kHz
 	initRtc.RTC_SynchPrediv  = 399;
 	initRtc.RTC_HourFormat  = RTC_HourFormat_24;
 	if (RTC_Init(&initRtc) == ERROR)
@@ -263,7 +261,7 @@ void tim_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
 	TIM_TimeBaseStructInit(&timInit);
-	timInit.TIM_Period = 2000;  // ms
+	timInit.TIM_Period = 5000;  // ms
 	timInit.TIM_Prescaler = (uint16_t) (SystemCoreClock / 1000) - 1;
 	TIM_TimeBaseInit(TIM2, &timInit);
 
@@ -348,8 +346,6 @@ int main(void)
 
 	lcd_str("hello");
 
-	ds1820_read_temp(PIN_TEMP1);
-
 	write_sdcard();
 
 	/*while (1) {
@@ -373,13 +369,26 @@ int main(void)
 				temp = ds1820_read_temp(PIN_TEMP1);
 
 				out_time(usart_put, &timeRtc);
+				usart_put(' ');
+				out_byte(usart_put, (temp >> 1));
+				usart_put('.');
+				if (temp & 1)
+					usart_put('5');
+				else
+					usart_put('0');
 				usart_put('\r');
 				usart_put('\n');
 				
 				lcd_clear();
 				out_time(lcd_write, &timeRtc);
 				lcd_write(' ');
-				out_byte(lcd_write, temp);
+				out_byte(lcd_write, (temp >> 1));
+				lcd_write('.');
+				if (temp & 1)
+					lcd_write('5');
+				else
+					lcd_write('0');
+
 				//usart_num(timeRtc.RTC_Hours);
 				//usart_str(":");
 				//usart_num(timeRtc.RTC_Minutes);

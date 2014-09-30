@@ -13,16 +13,15 @@ void out_str(FnPut put, const char* str)
 //------------------------------------------------------------------------------
 void out_byte(FnPut put, uint8_t num)
 {
-	char digit0, digit1, digit2;
+	char digit0, digit1, digit2='0';
 
 	digit0 = '0'+(num % 10);
 	num /= 10;
 	digit1 = '0'+(num % 10);
 
-	if (num > 100) {
+	if (num > 10) {
 		num /= 10;
 		digit2 = '0'+(num % 10);
-
 		(*put)(digit2);
 	}
 	(*put)(digit1);

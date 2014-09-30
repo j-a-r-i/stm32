@@ -66,16 +66,21 @@ uint8_t ds1820_read(uint8_t pin)
 
 	config_port_set(pin);
 	delay_us(2);
-	for (i=0; i<8; i++) {
+	for (i=1; i; i<<=1) {
 		config_port_clear(pin);
-		delay_us(2);
+		delay_us(4);
 		config_port_mode(pin, MODE_INPUT);
-		ret = ret << 1;
-		delay_us(13);
-		if (config_port_read(pin))
-			ret++;
-
-		delay_us(48);
+		//ret = ret << 1;
+		delay_us(9);
+		//if (config_port_read(pin)) {
+		if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13)) {
+			set_TEMP3;
+		//if (config_port_read(PIN_BUTTON)) {
+			ret |= i;
+		}
+		delay_us(2);
+		clr_TEMP3;
+		delay_us(60);
 		config_port_set(pin);
 		config_port_mode(pin, MODE_OUTPUT);
 		delay_us(4);
@@ -123,9 +128,6 @@ uint8_t ds1820_read_temp(uint8_t pin)
 	delay_us(2);
 	clr_TEMP2;
 	temp_msb = ds1820_read(pin);
-	set_TEMP2;
-	delay_us(2);
-	clr_TEMP2;
 	ds1820_read(pin); // Th register or user byte 1
 	ds1820_read(pin); // Tl register or user byte 2
 	ds1820_read(pin); // reserved
