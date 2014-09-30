@@ -363,8 +363,8 @@ int main(void)
 			uint8_t temp;
 			switch (ev) {
 			case EV_TIMER1:
-				//toggle_LED1;
-
+				set_LED1;
+				
 				RTC_GetTime(RTC_Format_BIN, &timeRtc);
 				temp = ds1820_read_temp(PIN_TEMP1);
 
@@ -389,6 +389,7 @@ int main(void)
 				else
 					lcd_write('0');
 
+				clr_LED1;
 				//usart_num(timeRtc.RTC_Hours);
 				//usart_str(":");
 				//usart_num(timeRtc.RTC_Minutes);
@@ -430,7 +431,6 @@ void SysTick_Handler(void)
 //------------------------------------------------------------------------------
 void RTC_IRQHandler(void)
 {
-	//set_LED1;
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET) {
 		USART_SendData(USART1, 'a');
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
