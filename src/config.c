@@ -28,10 +28,17 @@ void config_port_init (void)
 	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
 	ioInit.GPIO_Mode = GPIO_Mode_OUT;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOB, &ioInit);
+	
+	ioInit.GPIO_Pin = GPIO_Pin_6;
+	ioInit.GPIO_Mode = GPIO_Mode_IN;
+	ioInit.GPIO_OType = GPIO_OType_PP;
+	ioInit.GPIO_PuPd = GPIO_PuPd_DOWN;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOB, &ioInit);
 	
@@ -50,7 +57,7 @@ void config_port_init (void)
 	ioInit.GPIO_Mode = GPIO_Mode_OUT;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	ioInit.GPIO_Speed = GPIO_Speed_50MHz;
+	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOC, &ioInit);
 }
 
@@ -61,6 +68,15 @@ void config_port_set (uint8_t pin)
 		case PIN_BUTTON:
 			GPIOA->BSRR = GPIO_Pin_0;
 			break;
+		case PIN_CS_RFM12B:
+			GPIOB->BSRR = GPIO_Pin_0;
+			break;
+		case PIN_CS_W5200:
+			GPIOB->BSRR = GPIO_Pin_1;
+			break;
+		case PIN_CS_SDCARD:
+			GPIOB->BSRR = GPIO_Pin_2;
+			break;
 		case PIN_TEMP2:
 			GPIOB->BSRR = GPIO_Pin_3;
 			break;
@@ -69,6 +85,9 @@ void config_port_set (uint8_t pin)
 			break;
 		case PIN_TEMP4:
 			GPIOB->BSRR = GPIO_Pin_5;
+			break;
+		case PIN_RFM12B_IRQ:
+			GPIOB->BSRR = GPIO_Pin_6;
 			break;
 		case PIN_LCD_DATA1:
 			GPIOC->BSRR = GPIO_Pin_0;
@@ -107,6 +126,15 @@ void config_port_clear (uint8_t pin)
 		case PIN_BUTTON:
 			GPIOA->BRR = GPIO_Pin_0;
 			break;
+		case PIN_CS_RFM12B:
+			GPIOB->BRR = GPIO_Pin_0;
+			break;
+		case PIN_CS_W5200:
+			GPIOB->BRR = GPIO_Pin_1;
+			break;
+		case PIN_CS_SDCARD:
+			GPIOB->BRR = GPIO_Pin_2;
+			break;
 		case PIN_TEMP2:
 			GPIOB->BRR = GPIO_Pin_3;
 			break;
@@ -115,6 +143,9 @@ void config_port_clear (uint8_t pin)
 			break;
 		case PIN_TEMP4:
 			GPIOB->BRR = GPIO_Pin_5;
+			break;
+		case PIN_RFM12B_IRQ:
+			GPIOB->BRR = GPIO_Pin_6;
 			break;
 		case PIN_LCD_DATA1:
 			GPIOC->BRR = GPIO_Pin_0;
@@ -151,24 +182,24 @@ void config_port_mode (uint8_t pin, uint8_t out)
 	switch (pin)
 	{
 		case PIN_TEMP2:
-			GPIOB->MODER &= ~((uint32_t)0x3 << (3*2));
+			GPIOB->MODER &= ~(((uint32_t)0x3) << (3*2));
 			if (out)
 			{
-				GPIOB->MODER |= ((uint32_t)0x1 << (3*2));
+				GPIOB->MODER |= (((uint32_t)0x1) << (3*2));
 			}
 			break;
 		case PIN_TEMP3:
-			GPIOB->MODER &= ~((uint32_t)0x3 << (4*2));
+			GPIOB->MODER &= ~(((uint32_t)0x3) << (4*2));
 			if (out)
 			{
-				GPIOB->MODER |= ((uint32_t)0x1 << (4*2));
+				GPIOB->MODER |= (((uint32_t)0x1) << (4*2));
 			}
 			break;
 		case PIN_TEMP4:
-			GPIOB->MODER &= ~((uint32_t)0x3 << (5*2));
+			GPIOB->MODER &= ~(((uint32_t)0x3) << (5*2));
 			if (out)
 			{
-				GPIOB->MODER |= ((uint32_t)0x1 << (5*2));
+				GPIOB->MODER |= (((uint32_t)0x1) << (5*2));
 			}
 			break;
 		case PIN_TEMP1:
@@ -187,19 +218,22 @@ uint8_t config_port_read (uint8_t pin)
 	switch (pin)
 	{
 		case PIN_BUTTON:
-			ret = GPIOA->IDR & GPIO_Pin_0;
+			ret = ((GPIOA->IDR & GPIO_Pin_0) == GPIO_Pin_0);
 			break;
 		case PIN_TEMP2:
-			ret = GPIOB->IDR & GPIO_Pin_3;
+			ret = ((GPIOB->IDR & GPIO_Pin_3) == GPIO_Pin_3);
 			break;
 		case PIN_TEMP3:
-			ret = GPIOB->IDR & GPIO_Pin_4;
+			ret = ((GPIOB->IDR & GPIO_Pin_4) == GPIO_Pin_4);
 			break;
 		case PIN_TEMP4:
-			ret = GPIOB->IDR & GPIO_Pin_5;
+			ret = ((GPIOB->IDR & GPIO_Pin_5) == GPIO_Pin_5);
+			break;
+		case PIN_RFM12B_IRQ:
+			ret = ((GPIOB->IDR & GPIO_Pin_6) == GPIO_Pin_6);
 			break;
 		case PIN_TEMP1:
-			ret = GPIOC->IDR & GPIO_Pin_13;
+			ret = ((GPIOC->IDR & GPIO_Pin_13) == GPIO_Pin_13);
 			break;
 	}
 	return ret;

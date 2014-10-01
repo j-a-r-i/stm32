@@ -70,11 +70,9 @@ uint8_t ds1820_read(uint8_t pin)
 		config_port_clear(pin);
 		delay_us(4);
 		config_port_mode(pin, MODE_INPUT);
-		//ret = ret << 1;
 		delay_us(9);
-		//if (config_port_read(pin)) {
-		if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13)) {
-		//if (config_port_read(PIN_BUTTON)) {
+		if (config_port_read(pin)) {
+		//if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13)) {
 			ret |= i;
 		}
 		delay_us(60);
