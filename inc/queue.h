@@ -13,5 +13,6 @@ void queue_push(queue_t *q, uint8_t data);
 uint8_t queue_pop(queue_t *q);
 
 #define queue_empty(q) (q.top == q.bottom)
+#define queue_some(q) (q.top != q.bottom)
 
 #endif

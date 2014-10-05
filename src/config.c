@@ -7,19 +7,25 @@ void config_port_init (void)
 	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_0;
+	ioInit.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_13;
+	ioInit.GPIO_Mode = GPIO_Mode_OUT;
+	ioInit.GPIO_OType = GPIO_OType_PP;
+	ioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &ioInit);
+	
+	ioInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_8 | GPIO_Pin_12;
 	ioInit.GPIO_Mode = GPIO_Mode_IN;
 	ioInit.GPIO_OType = GPIO_OType_PP;
 	ioInit.GPIO_PuPd = GPIO_PuPd_DOWN;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &ioInit);
 	
-	ioInit.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_9 | GPIO_Pin_10;
+	ioInit.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_9 | GPIO_Pin_10;
 	ioInit.GPIO_Mode = GPIO_Mode_AF;
 	ioInit.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &ioInit);
 	
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource4, 0);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, 0);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, 0);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, 0);
@@ -67,6 +73,27 @@ void config_port_set (uint8_t pin)
 	{
 		case PIN_BUTTON:
 			GPIOA->BSRR = GPIO_Pin_0;
+			break;
+		case PIN_BTN1:
+			GPIOA->BSRR = GPIO_Pin_1;
+			break;
+		case PIN_BTN2:
+			GPIOA->BSRR = GPIO_Pin_2;
+			break;
+		case PIN_BTN3:
+			GPIOA->BSRR = GPIO_Pin_3;
+			break;
+		case PIN_IRIN:
+			GPIOA->BSRR = GPIO_Pin_8;
+			break;
+		case PIN_NEXA_OUT:
+			GPIOA->BSRR = GPIO_Pin_11;
+			break;
+		case PIN_NEXA_IN:
+			GPIOA->BSRR = GPIO_Pin_12;
+			break;
+		case PIN_IROUT:
+			GPIOA->BSRR = GPIO_Pin_13;
 			break;
 		case PIN_CS_RFM12B:
 			GPIOB->BSRR = GPIO_Pin_0;
@@ -125,6 +152,27 @@ void config_port_clear (uint8_t pin)
 	{
 		case PIN_BUTTON:
 			GPIOA->BRR = GPIO_Pin_0;
+			break;
+		case PIN_BTN1:
+			GPIOA->BRR = GPIO_Pin_1;
+			break;
+		case PIN_BTN2:
+			GPIOA->BRR = GPIO_Pin_2;
+			break;
+		case PIN_BTN3:
+			GPIOA->BRR = GPIO_Pin_3;
+			break;
+		case PIN_IRIN:
+			GPIOA->BRR = GPIO_Pin_8;
+			break;
+		case PIN_NEXA_OUT:
+			GPIOA->BRR = GPIO_Pin_11;
+			break;
+		case PIN_NEXA_IN:
+			GPIOA->BRR = GPIO_Pin_12;
+			break;
+		case PIN_IROUT:
+			GPIOA->BRR = GPIO_Pin_13;
 			break;
 		case PIN_CS_RFM12B:
 			GPIOB->BRR = GPIO_Pin_0;
@@ -219,6 +267,21 @@ uint8_t config_port_read (uint8_t pin)
 	{
 		case PIN_BUTTON:
 			ret = ((GPIOA->IDR & GPIO_Pin_0) == GPIO_Pin_0);
+			break;
+		case PIN_BTN1:
+			ret = ((GPIOA->IDR & GPIO_Pin_1) == GPIO_Pin_1);
+			break;
+		case PIN_BTN2:
+			ret = ((GPIOA->IDR & GPIO_Pin_2) == GPIO_Pin_2);
+			break;
+		case PIN_BTN3:
+			ret = ((GPIOA->IDR & GPIO_Pin_3) == GPIO_Pin_3);
+			break;
+		case PIN_IRIN:
+			ret = ((GPIOA->IDR & GPIO_Pin_8) == GPIO_Pin_8);
+			break;
+		case PIN_NEXA_IN:
+			ret = ((GPIOA->IDR & GPIO_Pin_12) == GPIO_Pin_12);
 			break;
 		case PIN_TEMP2:
 			ret = ((GPIOB->IDR & GPIO_Pin_3) == GPIO_Pin_3);

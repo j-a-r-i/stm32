@@ -1,6 +1,8 @@
 #include "stm32f0xx.h"
 #include "test.h"
 #include "config.h"
+#include "main.h"
+#include "ds1820.h"
 
 static uint32_t bits = 0;
 
@@ -24,6 +26,26 @@ static uint32_t bits = 0;
 #define BIT18 131072
 #define BIT19 262144
 #define BIT20 524288
+
+//------------------------------------------------------------------------------
+void test_run(uint8_t cmd)
+{
+	switch (cmd) {
+	case 1:
+		while (1) {
+			ds1820_write(PIN_TEMP1, 0xCC);
+			delay_us(300);
+		}
+		break;
+
+	case 2:
+		while (1) {
+			toggle_LED2;
+			delay_ms(1000);
+		}
+		break;
+	}
+}
 
 //------------------------------------------------------------------------------
 void test_setbit(uint8_t pin, uint32_t bit)

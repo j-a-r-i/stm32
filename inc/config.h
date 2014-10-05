@@ -6,6 +6,12 @@ extern void config_port_set (uint8_t pin);
 extern void config_port_clear (uint8_t pin);
 extern void config_port_mode (uint8_t pin, uint8_t out);
 extern uint8_t config_port_read (uint8_t pin);
+#define set_NEXA_OUT GPIOA->BSRR = GPIO_Pin_11
+#define clr_NEXA_OUT GPIOA->BRR  = GPIO_Pin_11
+#define toggle_NEXA_OUT GPIOA->ODR ^= GPIO_Pin_11
+#define set_IROUT GPIOA->BSRR = GPIO_Pin_13
+#define clr_IROUT GPIOA->BRR  = GPIO_Pin_13
+#define toggle_IROUT GPIOA->ODR ^= GPIO_Pin_13
 #define set_CS_RFM12B GPIOB->BSRR = GPIO_Pin_0
 #define clr_CS_RFM12B GPIOB->BRR  = GPIO_Pin_0
 #define toggle_CS_RFM12B GPIOB->ODR ^= GPIO_Pin_0
@@ -52,21 +58,28 @@ extern uint8_t config_port_read (uint8_t pin);
 #define clr_TEMP1 GPIOC->BRR  = GPIO_Pin_13
 #define toggle_TEMP1 GPIOC->ODR ^= GPIO_Pin_13
 #define PIN_BUTTON 1
-#define PIN_CS_RFM12B 2
-#define PIN_CS_W5200 3
-#define PIN_CS_SDCARD 4
-#define PIN_TEMP2 5
-#define PIN_TEMP3 6
-#define PIN_TEMP4 7
-#define PIN_RFM12B_IRQ 8
-#define PIN_LCD_DATA1 9
-#define PIN_LCD_DATA2 10
-#define PIN_LCD_DATA3 11
-#define PIN_LCD_DATA4 12
-#define PIN_LED1 13
-#define PIN_LED2 14
-#define PIN_LCD_RS 15
-#define PIN_LCD_ENABLE 16
-#define PIN_TEMP1 17
+#define PIN_BTN1 2
+#define PIN_BTN2 3
+#define PIN_BTN3 4
+#define PIN_IRIN 5
+#define PIN_NEXA_OUT 6
+#define PIN_NEXA_IN 7
+#define PIN_IROUT 8
+#define PIN_CS_RFM12B 9
+#define PIN_CS_W5200 10
+#define PIN_CS_SDCARD 11
+#define PIN_TEMP2 12
+#define PIN_TEMP3 13
+#define PIN_TEMP4 14
+#define PIN_RFM12B_IRQ 15
+#define PIN_LCD_DATA1 16
+#define PIN_LCD_DATA2 17
+#define PIN_LCD_DATA3 18
+#define PIN_LCD_DATA4 19
+#define PIN_LED1 20
+#define PIN_LED2 21
+#define PIN_LCD_RS 22
+#define PIN_LCD_ENABLE 23
+#define PIN_TEMP1 24
 
 #endif

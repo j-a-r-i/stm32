@@ -13,6 +13,7 @@
 #include "queue.h"
 #include "pff.h"
 #include "usart.h"
+#include "nexa.h"
 
 typedef void (*callback_fn)(void);
 
@@ -264,12 +265,6 @@ int main(void)
 	}
 
 
-#if 0
-	while (1) {
-		ds1820_write(PIN_TEMP1, 0xCC);
-		delay_us(300);
-	}
-#endif
 
 
 	usart_str("\r\nHello\r\n");
@@ -277,13 +272,8 @@ int main(void)
 	lcd_str("hello");
 
 	write_sdcard();
+	nexa_send(NEXA_CH_1, NEXA_UNIT_1, NEXA_ON);
 
-	/*while (1) {
-	    toggle_LED2;
-		delay_ms(1000);
-    }*/
-
-	//	stlinky_tx(&sterm, "Hi\n", 3);
 	while (1) {
 		if (queue_empty(events)) {
 			delay_ms(2);
