@@ -1,4 +1,9 @@
 #include "stm32f0xx.h"
+#include "queue.h"
+
+#define FIFO_SIZE 40
+static queue_t     txfifo;
+static uint8_t     txfifoData[FIFO_SIZE];
 
 //------------------------------------------------------------------------------
 void usart_init(void)
@@ -11,7 +16,6 @@ void usart_init(void)
 	USART_ClockStructInit(&clockInit);
 	USART_ClockInit(USART1, &clockInit);
 
-
 	initUsart.USART_BaudRate = 9600;
 	initUsart.USART_WordLength = USART_WordLength_8b;
 	initUsart.USART_StopBits = USART_StopBits_1;
@@ -20,7 +24,6 @@ void usart_init(void)
 	initUsart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_Init(USART1, &initUsart);
 
-	//USART_ITConfig(USART1, USART_IT_TXNE, ENABLE);
     //NVIC_EnableIRQ(USART1_IRQn);
 
 	NVIC_InitTypeDef nvicInit;
@@ -32,24 +35,32 @@ void usart_init(void)
 	USART_Cmd(USART1, ENABLE);
 
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(USART1, USART_IT_TXE,  ENABLE);
+
+	queue_init(&txfifo, FIFO_SIZE, txfifoData);	
 }
 
 //------------------------------------------------------------------------------
 void usart_put(uint8_t ch)
 {
-      while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+	  //while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
 
-      USART_SendData(USART1, (uint8_t) ch);
+      //USART_SendData(USART1, (uint8_t) ch);
+
+	queue_push(&txfifo, ch);
 }
 
 //------------------------------------------------------------------------------
 void usart_str(const char *s)
 {
 	while(*s) {
-		while( USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET );
-		USART_SendData(USART1, *s);
+		//while( USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET );
+		//USART_SendData(USART1, *s);
+		queue_push(&txfifo, *s);
 		s++;
 	}
+	//if (queue_some(&txfifo) && (USART_GetFlagStatus(USART1, USART_FLAG_TC) == SET))
+	USART_SendData(USART1, queue_pop(&txfifo));
 }
 
 //------------------------------------------------------------------------------
@@ -79,5 +90,7 @@ void USART1_IRQHandler(void)
 		test_exec(ch);
 	}
 	if (USART_GetITStatus(USART1, USART_IT_TXE) != RESET) {
+		if (queue_some(&txfifo))
+			USART_SendData(USART1, queue_pop(&txfifo));
 	}
 }
