@@ -1,4 +1,4 @@
-#include "stm32f0xx.h"
+#include "hw.h"
 #include "config.h"
 
 void config_port_init (void)

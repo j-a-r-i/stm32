@@ -3,8 +3,7 @@
  *
  * Copyright 2014 Jari Ojanen
  */
-#include "stm32f0xx.h"
-#include "config.h"
+#include "hw.h"
 #include "ds1820.h"
 #include "lcd.h"
 #include "main.h"

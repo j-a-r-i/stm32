@@ -1,7 +1,5 @@
-#include "stm32f0xx.h"
-#include "config.h"
+#include "hw.h"
 #include "nexa.h"
-#include "main.h"
 
 #define TRANSMITTER_CODE 0xFF00
 

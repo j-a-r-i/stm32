@@ -1,8 +1,5 @@
 #include "hw.h"
 #include "lcd.h"
-#include "config.h"
-#include "main.h"
-#include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
 
