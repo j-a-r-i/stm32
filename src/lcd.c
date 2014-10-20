@@ -6,13 +6,6 @@
 void lcd_output(uint8_t);
 
 #define DELAY_1US  __asm__ __volatile__ ("nop")
-#if 0
-//#define delay_us(x)  __delay_cycles(x)
-//#define delay_ms(x)  __delay_cycles(x*1000)
-#else
-//#define delay_us(x)  delay_us2(x)
-//#define delay_ms(x)  delay_ms2(x)
-#endif
 
 void lcd_init()
 {
