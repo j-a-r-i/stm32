@@ -1,6 +1,8 @@
 #ifndef _OUT_H
 #define _OUT_H
 
+#include "stm32f0xx_rtc.h"
+
 typedef void (*FnPut)(uint8_t);
 
 extern void out_str(FnPut put, const char* str);

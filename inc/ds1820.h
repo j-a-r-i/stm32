@@ -12,6 +12,7 @@
 
 extern void ds1820_init(uint8_t pin);
 extern void ds1820_write(uint8_t pin, uint8_t data);
+extern uint8_t ds1820_measure(uint8_t pin);
 extern uint8_t ds1820_read_temp(uint8_t pin);
 
 #endif

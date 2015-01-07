@@ -3,7 +3,12 @@
  *
  * Copyright 2014 Jari Ojanen
  */
-#include "stm32f0xx.h"
+#include "hw.h"
+#include "stm32f0xx_tim.h"
+#include "stm32f0xx_misc.h"
+#include "stm32f0xx_pwr.h"
+#include "stm32f0xx_exti.h"
+#include "stm32f0xx_syscfg.h"
 #include "config.h"
 #include "ds1820.h"
 #include "lcd.h"
@@ -11,7 +16,7 @@
 #include "test.h"
 #include "out.h"
 #include "queue.h"
-#include "pff.h"
+//#include "pff.h"
 #include "usart.h"
 #include "nexa.h"
 
@@ -22,7 +27,8 @@ static callback_fn timerCb;
 static uint32_t    timerCounter;
 static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
-static uint8_t     f_delay;
+//static uint8_t     f_delay;
+static uint8_t  measCounter;
 
 #define EVENTS_SIZE 4
 static queue_t     events;
@@ -67,8 +73,8 @@ void delay_ms(uint16_t msDelay)
 	uint32_t i;
 
 	for (i=0; i<count; i++) {
-		__asm__ __volatile__ ("nop");
-		//asm("nop");
+		//__asm__ __volatile__ ("nop");
+		__asm { nop }
 	}
 
     /*uint32_t temp;  
@@ -86,42 +92,21 @@ void delay_ms(uint16_t msDelay)
 }  
 
 //------------------------------------------------------------------------------
-/*void delay_ms2(uint16_t msDelay)
-{
-    uint32_t i = 0x20000;
-
-	i = msDelay*i;
-
-	while (i)
-		i--;
-
-	timer2Counter = msDelay;
-	f_delay = 1;
-
-	while (f_delay) {
-	    toggle_LED2;
-   }
-}*/
-
-
-//------------------------------------------------------------------------------
 void exti_init(void)
 {
+	EXTI_InitTypeDef extiInit;
+	NVIC_InitTypeDef nvicInit;
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
 
-	EXTI_InitTypeDef extiInit = {
-		.EXTI_Line = EXTI_Line0,
-		.EXTI_Mode = EXTI_Mode_Interrupt,
-		.EXTI_Trigger = EXTI_Trigger_Rising,
-		.EXTI_LineCmd = ENABLE
-	};
+	extiInit.EXTI_Line = EXTI_Line0;
+	extiInit.EXTI_Mode = EXTI_Mode_Interrupt;
+	extiInit.EXTI_Trigger = EXTI_Trigger_Rising;
+	extiInit.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&extiInit);
 
-	NVIC_InitTypeDef nvicInit = {
-		.NVIC_IRQChannel = EXTI0_1_IRQn,
-		.NVIC_IRQChannelPriority = 0x01,
-		.NVIC_IRQChannelCmd = ENABLE
-	};
+	nvicInit.NVIC_IRQChannel = EXTI0_1_IRQn;
+	nvicInit.NVIC_IRQChannelPriority = 0x01;
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvicInit);
 }
 
@@ -192,7 +177,7 @@ void tim_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
 	TIM_TimeBaseStructInit(&timInit);
-	timInit.TIM_Period = 5000;  // ms
+	timInit.TIM_Period = 10000;  // ms  = 10 sec
 	timInit.TIM_Prescaler = (uint16_t) (SystemCoreClock / 1000) - 1;
 	TIM_TimeBaseInit(TIM2, &timInit);
 
@@ -205,6 +190,7 @@ void tim_init(void)
 	TIM_Cmd(TIM2, ENABLE);
 }
 
+#if 0
 int write_sdcard(void)
 {
 	FATFS fs;          /* Work area (file system object) for the volume */
@@ -224,12 +210,14 @@ int write_sdcard(void)
 	
 	return res;
 }
+#endif
 
 //------------------------------------------------------------------------------
 int main(void)
 {
 	//uint32_t loopCount;
-
+	measCounter = 0;
+	
 	queue_init(&events, EVENTS_SIZE, eventsData);
 #if 0
 	queue_push(&events, 10);
@@ -255,7 +243,7 @@ int main(void)
 	config_port_init();
 	usart_init();
 	tim_init();
-  	rtc_init();
+  rtc_init();
 	lcd_init();
 	ds1820_init(PIN_TEMP1);
 
@@ -264,14 +252,9 @@ int main(void)
 		while (1);
 	}
 
+	usart_str("Hello\r\n");
 
-
-
-	usart_str("\r\nHello\r\n");
-
-	lcd_str("hello");
-
-	write_sdcard();
+	//write_sdcard();
 	nexa_send(NEXA_CH_1, NEXA_UNIT_1, NEXA_ON);
 
 	while (1) {
@@ -286,16 +269,20 @@ int main(void)
 				set_LED1;
 				
 				RTC_GetTime(RTC_Format_BIN, &timeRtc);
-				temp = ds1820_read_temp(PIN_TEMP1);
-
-				out_time(usart_put, &timeRtc);
+				ds1820_measure(PIN_TEMP2);
+				delay_ms(750);
+				temp = ds1820_read_temp(PIN_TEMP2);
+				measCounter++;
+			
+				//out_time(usart_put, &timeRtc);
+				usart_put('M');
+				out_byte(usart_put, measCounter);
 				usart_put(' ');
-				out_byte(usart_put, (temp >> 1));
-				usart_put('.');
-				if (temp & 1)
-					usart_put('5');
-				else
-					usart_put('0');
+				out_byte(usart_put, temp);
+				usart_put(' ');
+				out_byte(usart_put, 0);
+				usart_put(' ');
+				out_byte(usart_put, 0);
 				usart_put('\r');
 				usart_put('\n');
 				
@@ -343,8 +330,8 @@ void SysTick_Handler(void)
 
 	if (timer2Counter > 0) {
 		timer2Counter--;
-		if (timer2Counter == 0)
-			f_delay = 0;
+		//if (timer2Counter == 0)
+			//f_delay = 0;
 	}
 }
 
@@ -352,7 +339,8 @@ void SysTick_Handler(void)
 void RTC_IRQHandler(void)
 {
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET) {
-		USART_SendData(USART1, 'a');
+		//USART_SendData(USART1, 'a');
+		usart_str("rtc irq\n");
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
 	}
 }
