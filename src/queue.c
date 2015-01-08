@@ -1,4 +1,4 @@
-#include "stm32f0xx.h"
+#include "hw.h"
 #include "queue.h"
 
 void queue_init(queue_t *q, uint8_t size, uint8_t *data)
@@ -11,8 +11,11 @@ void queue_init(queue_t *q, uint8_t size, uint8_t *data)
 
 void queue_push(queue_t *q, uint8_t data)
 {
+	int next = (q->top + 1) % q->size;
+	if (next == q->bottom)
+		return;
 	q->data[q->top] = data;
-	q->top = (q->top + 1) % q->size;
+	q->top = next;
 }
 
 uint8_t queue_pop(queue_t *q)

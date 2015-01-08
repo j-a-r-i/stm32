@@ -1,7 +1,6 @@
 #include "hw.h"
 #include "config.h"
 #include "nexa.h"
-#include "main.h"
 
 #define TRANSMITTER_CODE 0xFF00
 

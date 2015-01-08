@@ -1,7 +1,5 @@
 #include "hw.h"
 #include "test.h"
-#include "config.h"
-#include "main.h"
 #include "ds1820.h"
 
 static uint32_t bits = 0;
