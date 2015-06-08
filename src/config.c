@@ -1,7 +1,7 @@
-#include "hw.h"
+#include "stm32f0xx.h"
 #include "config.h"
 
-void config_port_init (void)
+void io_init (void)
 {
 	GPIO_InitTypeDef ioInit;
 	
@@ -67,7 +67,7 @@ void config_port_init (void)
 	GPIO_Init(GPIOC, &ioInit);
 }
 
-void config_port_set (uint8_t pin)
+void io_set (uint8_t pin)
 {
 	switch (pin)
 	{
@@ -146,7 +146,7 @@ void config_port_set (uint8_t pin)
 	}
 }
 
-void config_port_clear (uint8_t pin)
+void io_clear (uint8_t pin)
 {
 	switch (pin)
 	{
@@ -225,7 +225,7 @@ void config_port_clear (uint8_t pin)
 	}
 }
 
-void config_port_mode (uint8_t pin, uint8_t out)
+void io_mode (uint8_t pin, uint8_t out)
 {
 	switch (pin)
 	{
@@ -260,7 +260,7 @@ void config_port_mode (uint8_t pin, uint8_t out)
 	}
 }
 
-uint8_t config_port_read (uint8_t pin)
+uint8_t io_read (uint8_t pin)
 {
 	uint8_t ret=0;
 	switch (pin)

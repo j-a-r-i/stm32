@@ -1,11 +1,11 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-extern void config_port_init (void);
-extern void config_port_set (uint8_t pin);
-extern void config_port_clear (uint8_t pin);
-extern void config_port_mode (uint8_t pin, uint8_t out);
-extern uint8_t config_port_read (uint8_t pin);
+extern void io_init (void);
+extern void io_set (uint8_t pin);
+extern void io_clear (uint8_t pin);
+extern void io_mode (uint8_t pin, uint8_t out);
+extern uint8_t io_read (uint8_t pin);
 #define set_NEXA_OUT GPIOA->BSRR = GPIO_Pin_11
 #define clr_NEXA_OUT GPIOA->BRR  = GPIO_Pin_11
 #define toggle_NEXA_OUT GPIOA->ODR ^= GPIO_Pin_11

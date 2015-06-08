@@ -50,11 +50,11 @@ void test_setbit(uint8_t pin, uint32_t bit)
 {
 	if (bits & bit) {
 		bits &= ~bit;
-		config_port_clear(pin);
+		io_clear(pin);
 	}
 	else {
 		bits |= bit;
-		config_port_set(pin);
+		io_set(pin);
 	}
 }
 
