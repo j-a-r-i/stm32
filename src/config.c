@@ -1,4 +1,4 @@
-#include "stm32f0xx.h"
+#include "hw.h"
 #include "config.h"
 
 void io_init (void)
@@ -300,4 +300,22 @@ uint8_t io_read (uint8_t pin)
 			break;
 	}
 	return ret;
+}
+
+void spi_init (void)
+{
+	//{BEGIN spi_init}
+	//{END spi_init}
+}
+
+void spi_tx (uint8_t val)
+{
+	//{BEGIN spi_tx}
+	//{END spi_tx}
+}
+
+uint8_t spi_rx (uint8_t val)
+{
+	//{BEGIN spi_rx}
+	//{END spi_rx}
 }

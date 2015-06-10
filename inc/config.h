@@ -81,5 +81,8 @@ extern uint8_t io_read (uint8_t pin);
 #define PIN_LCD_RS 22
 #define PIN_LCD_ENABLE 23
 #define PIN_TEMP1 24
+extern void spi_init (void);
+extern void spi_tx (uint8_t val);
+extern uint8_t spi_rx (uint8_t val);
 
 #endif
