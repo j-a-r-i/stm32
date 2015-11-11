@@ -1,7 +1,7 @@
 #include "hw.h"
 #include "config.h"
 
-void io_init (void)
+void port_init (void)
 {
 	GPIO_InitTypeDef ioInit;
 	
@@ -67,7 +67,7 @@ void io_init (void)
 	GPIO_Init(GPIOC, &ioInit);
 }
 
-void io_set (uint8_t pin)
+void port_set (uint8_t pin)
 {
 	switch (pin)
 	{
@@ -146,7 +146,7 @@ void io_set (uint8_t pin)
 	}
 }
 
-void io_clear (uint8_t pin)
+void port_clear (uint8_t pin)
 {
 	switch (pin)
 	{
@@ -225,7 +225,7 @@ void io_clear (uint8_t pin)
 	}
 }
 
-void io_mode (uint8_t pin, uint8_t out)
+void port_mode (uint8_t pin, uint8_t out)
 {
 	switch (pin)
 	{
@@ -260,7 +260,7 @@ void io_mode (uint8_t pin, uint8_t out)
 	}
 }
 
-uint8_t io_read (uint8_t pin)
+uint8_t port_read (uint8_t pin)
 {
 	uint8_t ret=0;
 	switch (pin)
@@ -317,5 +317,6 @@ void spi_tx (uint8_t val)
 uint8_t spi_rx (uint8_t val)
 {
 	//{BEGIN spi_rx}
+	return 0;
 	//{END spi_rx}
 }
