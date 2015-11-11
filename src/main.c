@@ -240,7 +240,7 @@ int main(void)
 
 	SystemCoreClockUpdate();
 
-	config_port_init();
+	port_init();
 	usart_init();
 	tim_init();
   rtc_init();
