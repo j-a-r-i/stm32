@@ -1,11 +1,11 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-extern void port_init (void);
-extern void port_set (uint8_t pin);
 extern void port_clear (uint8_t pin);
+extern void port_init (void);
 extern void port_mode (uint8_t pin, uint8_t out);
 extern uint8_t port_read (uint8_t pin);
+extern void port_set (uint8_t pin);
 #define set_NEXA_OUT GPIOA->BSRR = GPIO_Pin_11
 #define clr_NEXA_OUT GPIOA->BRR  = GPIO_Pin_11
 #define toggle_NEXA_OUT GPIOA->ODR ^= GPIO_Pin_11
@@ -82,7 +82,7 @@ extern uint8_t port_read (uint8_t pin);
 #define PIN_LCD_ENABLE 23
 #define PIN_TEMP1 24
 extern void spi_init (void);
+extern void spi_rx (uint8_t val);
 extern void spi_tx (uint8_t val);
-extern uint8_t spi_rx (uint8_t val);
 
 #endif
