@@ -4,10 +4,12 @@
 
 #define TRANSMITTER_CODE 0xFF00
 
+//------------------------------------------------------------------------------
 void nexa_init(void)
 {
 }
 
+//------------------------------------------------------------------------------
 void nexa_send_bit(uint8_t bit)
 {
 	set_NEXA_OUT;
@@ -27,6 +29,7 @@ void nexa_send_bit(uint8_t bit)
 		delay_us(250);
 }
 
+//------------------------------------------------------------------------------
 void nexa_send(uint8_t channel, uint8_t unit, uint8_t status)
 {
 	uint32_t code;

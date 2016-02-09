@@ -15,37 +15,22 @@
 #include "main.h"
 #include "test.h"
 #include "out.h"
-#include "queue.h"
 //#include "pff.h"
 #include "usart.h"
 #include "nexa.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
-typedef void (*callback_fn)(void);
-
-static __IO uint32_t delayVar;
-static callback_fn timerCb;
-static uint32_t    timerCounter;
-static uint16_t    timer2Counter;
 static RTC_TimeTypeDef timeRtc;
-//static uint8_t     f_delay;
-static uint8_t  measCounter;
-
-#define EVENTS_SIZE 4
-static queue_t     events;
-static uint8_t     eventsData[EVENTS_SIZE];
+static QueueHandle_t commQueue1;
 
 #define EV_TIMER1 0xA1
 
-void SysTick_Handler(void);
 void usart_str(const char *s);
 
-//------------------------------------------------------------------------------
-void delayCb_ms(uint32_t msDelay, callback_fn fn)
-{
-	timerCb = fn;
-	timerCounter = msDelay;
-}
 
+//------------------------------------------------------------------------------
 void delay_us(uint16_t msDelay)  
 {
 	/*uint32_t count = (uint32_t)msDelay * 8;
@@ -66,30 +51,6 @@ void delay_us(uint16_t msDelay)
     SysTick->CTRL=0x00;  
     SysTick->VAL=0x00;
 }
-
-void delay_ms(uint16_t msDelay)  
-{  
-	uint32_t count = (uint32_t)msDelay * 8000;
-	uint32_t i;
-
-	for (i=0; i<count; i++) {
-		//__asm__ __volatile__ ("nop");
-		__asm { nop }
-	}
-
-    /*uint32_t temp;  
-    SysTick->LOAD=((uint32_t)msDelay)*48000;  
-    SysTick->VAL=0x00;  
-    SysTick->CTRL=0x01;  
-    do  
-    {  
-        temp=SysTick->CTRL;  
-    }  
-    while(temp&0x01 && !(temp&0x10000));  
-    SysTick->CTRL=0x00;  
-    SysTick->VAL=0x00;
-	*/
-}  
 
 //------------------------------------------------------------------------------
 void exti_init(void)
@@ -131,14 +92,20 @@ void rtc_init(void)
 
 	RCC_RTCCLKCmd(ENABLE);
 
-	if (RTC_WaitForSynchro() == ERROR)
+	if (RTC_WaitForSynchro() == ERROR) {
+#ifdef USE_SERIAL
 		usart_str("E RTC 0\r\n");
+#endif
+	}
 
 	initRtc.RTC_AsynchPrediv = 99;  // LSI is 40kHz
 	initRtc.RTC_SynchPrediv  = 399;
 	initRtc.RTC_HourFormat  = RTC_HourFormat_24;
-	if (RTC_Init(&initRtc) == ERROR)
+	if (RTC_Init(&initRtc) == ERROR) {
+#ifdef USE_SERIAL
 		usart_str("E RTC 1\r\n");
+#endif
+	}
 
 	// Sets time
 	//
@@ -146,8 +113,11 @@ void rtc_init(void)
 	timeRtc.RTC_Hours = 12;
 	timeRtc.RTC_Minutes = 00;
 	timeRtc.RTC_Seconds = 00;
-	if (RTC_SetTime(RTC_Format_BIN, &timeRtc))
+	if (RTC_SetTime(RTC_Format_BIN, &timeRtc)) {
+#ifdef USE_SERIAL
 		usart_str("E RTC 2\r\n");
+#endif
+	}
 
 	// Configure alarm
 	//
@@ -213,38 +183,69 @@ int write_sdcard(void)
 #endif
 
 //------------------------------------------------------------------------------
+void TaskComm(void* pvParameters)
+{		
+	char ch = 'a';
+	(void) pvParameters;                    // Just to stop compiler warnings.
+	
+#ifdef USE_SERIAL
+	usart_str("Hello\r\n");
+#endif
+	for (;;) {
+		//vTaskDelay(500);
+		if (xQueueReceive(commQueue1, &ch, (TickType_t)1000)) {
+#ifdef USE_SERIAL
+			//out_time(usart_put, &timeRtc);
+			usart_put('M');
+			out_byte(usart_put, measCounter);
+			usart_put(' ');
+			out_byte(usart_put, temp);
+			usart_put(' ');
+			out_byte(usart_put, 0);
+			usart_put(' ');
+			out_byte(usart_put, 0);
+			usart_put('\r');
+			usart_put('\n');
+#endif
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+void TaskMeasure(void* pvParameters)
+{		
+		uint8_t temp;
+		uint8_t measCounter = 0;
+
+   	(void) pvParameters;                    // Just to stop compiler warnings.
+	
+    for (;;) {
+				RTC_GetTime(RTC_Format_BIN, &timeRtc);
+				ds1820_measure(PIN_TEMP2);
+				vTaskDelay(750 / portTICK_PERIOD_MS);  // 750ms delay
+				temp = ds1820_read_temp(PIN_TEMP2);
+				measCounter++;
+
+				vTaskDelay(10000 / portTICK_PERIOD_MS);  // 10 sec delay
+    }
+}
+
+
+
+//------------------------------------------------------------------------------
 int main(void)
 {
-	//uint32_t loopCount;
-	measCounter = 0;
-	
-	queue_init(&events, EVENTS_SIZE, eventsData);
-#if 0
-	queue_push(&events, 10);
-	queue_push(&events, 20);
-	queue_push(&events, 30);
-	queue_push(&events, 40);
-	queue_push(&events, 50);
-	i = queue_pop(&events);
-	i = queue_pop(&events);
-	i = queue_pop(&events);
-	i = queue_pop(&events);
-	i = queue_pop(&events);
-	delayVar = i;
-#endif
-
-	//loopCount = 0;
-	delayVar = 2000;
-	timerCounter = 0;
-	timer2Counter = 0;
-
 	SystemCoreClockUpdate();
 
 	port_init();
+#ifdef USE_SERIAL
 	usart_init();
+#endif
 	tim_init();
   rtc_init();
+#ifdef USE_LCD
 	lcd_init();
+#endif
 	ds1820_init(PIN_TEMP1);
 
 	if (SysTick_Config(SystemCoreClock / 1000)) { 
@@ -252,40 +253,21 @@ int main(void)
 		while (1);
 	}
 
-	usart_str("Hello\r\n");
+	 xQueueCreate(5, sizeof(char));
+	
+   xTaskCreate( TaskComm,  "cmm", configMINIMAL_STACK_SIZE, NULL,
+        tskIDLE_PRIORITY, ( xTaskHandle * ) NULL );
+   xTaskCreate( TaskMeasure,"meas", configMINIMAL_STACK_SIZE, NULL, 
+        tskIDLE_PRIORITY, ( xTaskHandle * ) NULL );
 
-	//write_sdcard();
+   vTaskStartScheduler();
+		
 	nexa_send(NEXA_CH_1, NEXA_UNIT_1, NEXA_ON);
 
-	while (1) {
-		if (queue_empty(events)) {
-			delay_ms(2);
-		}
-		else {
-			uint8_t ev = queue_pop(&events);
-			uint8_t temp;
-			switch (ev) {
-			case EV_TIMER1:
-				set_LED1;
-				
-				RTC_GetTime(RTC_Format_BIN, &timeRtc);
-				ds1820_measure(PIN_TEMP2);
-				delay_ms(750);
-				temp = ds1820_read_temp(PIN_TEMP2);
-				measCounter++;
-			
-				//out_time(usart_put, &timeRtc);
-				usart_put('M');
-				out_byte(usart_put, measCounter);
-				usart_put(' ');
-				out_byte(usart_put, temp);
-				usart_put(' ');
-				out_byte(usart_put, 0);
-				usart_put(' ');
-				out_byte(usart_put, 0);
-				usart_put('\r');
-				usart_put('\n');
-				
+	for (;;);
+/*
+	set_LED1;
+#ifdef USE_LCD			
 				lcd_clear();
 				out_time(lcd_write, &timeRtc);
 				lcd_write(' ');
@@ -295,44 +277,9 @@ int main(void)
 					lcd_write('5');
 				else
 					lcd_write('0');
-
+#endif				
 				clr_LED1;
-				//usart_num(timeRtc.RTC_Hours);
-				//usart_str(":");
-				//usart_num(timeRtc.RTC_Minutes);
-				//usart_str(":");
-				//usart_num(timeRtc.RTC_Seconds);
-				//usart_str("\r\n");
-				//delay_ms(30);
-				break;
-			}
-		}
-#if 0
-		loopCount++;
-		if (loopCount == 1)
-			set_LED2;
-		else if (loopCount == 0x100000)
-			clr_LED2;
-		else if (loopCount == 0x200000)
-			loopCount=0;
-#endif
-	}
-}
-
-//------------------------------------------------------------------------------
-void SysTick_Handler(void)
-{
-	if (timerCounter > 0) {
-		timerCounter--;
-		if (timerCounter == 0)
-			(*timerCb)();
-	}
-
-	if (timer2Counter > 0) {
-		timer2Counter--;
-		//if (timer2Counter == 0)
-			//f_delay = 0;
-	}
+*/
 }
 
 //------------------------------------------------------------------------------
@@ -340,7 +287,9 @@ void RTC_IRQHandler(void)
 {
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET) {
 		//USART_SendData(USART1, 'a');
+#ifdef USE_SERIAL
 		usart_str("rtc irq\n");
+#endif
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
 	}
 }
@@ -348,9 +297,14 @@ void RTC_IRQHandler(void)
 //------------------------------------------------------------------------------
 void TIM2_IRQHandler(void) 
 {
+	char cIn = 'a';
+	BaseType_t highPriorityTaskWoken = pdFALSE;
+	
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		queue_push(&events, EV_TIMER1);
+		//queue_push(&events, EV_TIMER1);
+		
+		xQueueSendToBackFromISR(commQueue1, &cIn, &highPriorityTaskWoken);
 #if 0
 		toggle_LED2;
 #endif	
